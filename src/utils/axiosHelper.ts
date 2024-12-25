@@ -15,21 +15,21 @@ class AxiosHelper {
         });
 
         // Response interceptor
-        this.instance.interceptors.response.use(
-            (response) => response,
-            (error: AxiosError) => {
-                // Handle 401 unauthorized globally
-                if (error.response?.status === 401) {
-                    const token = Cookies.get('authToken');
-                    // Only handle 401 if user was previously authenticated
-                    if (token) {
-                        Cookies.remove('authToken');
-                        window.location.href = '/login';
-                    }
-                }
-                return Promise.reject(error);
-            }
-        );
+        // this.instance.interceptors.response.use(
+        //     (response) => response,
+        //     (error: AxiosError) => {
+        //         // Handle 401 unauthorized globally
+        //         if (error.response?.status === 401) {
+        //             const token = Cookies.get('authToken');
+        //             // Only handle 401 if user was previously authenticated
+        //             if (token) {
+        //                 Cookies.remove('authToken');
+        //                 window.location.href = '/login';
+        //             }
+        //         }
+        //         return Promise.reject(error);
+        //     }
+        // );
     }
 
     async get<T = any>(endpoint: string, params?: any, handleApiErrors: boolean = true): Promise<T> {

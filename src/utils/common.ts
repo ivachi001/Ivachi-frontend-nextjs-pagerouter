@@ -15,53 +15,15 @@ export const notify = {
   info: (msg: string) => message.info(msg),
 };
 
-export const apiErrors = (error: any) => {
-  if (error instanceof AxiosError) {
-    const response = error.response?.data as ApiErrorResponse;
-    
-    // Handle different error scenarios
-    if (error.response?.status === 401) {
-      notify.error(response?.message || 'Unauthorized access');
-      handleUnauthorize();
-      return;
-    }
-
-    if (error.response?.status === 403) {
-      notify.error(response?.message || 'Access forbidden');
-      return;
-    }
-
-    if (error.response?.status === 422) {
-      // Validation errors
-      if (response.errors) {
-        // Get first validation error message
-        const firstError = Object.values(response.errors)[0]?.[0];
-        notify.error(firstError || 'Validation failed');
-        return;
-      }
-    }
-
-    if (error.response?.status === 404) {
-      notify.error(response?.message || 'Resource not found');
-      return;
-    }
-
-    if (error.response?.status >= 500) {
-      notify.error('Server error. Please try again later.');
-      return;
-    }
-
-    // Default error message
-    notify.error(
-      response?.message || 
-      error.message || 
-      'Something went wrong. Please try again.'
-    );
+export const apiErrors = (res: any) => {
+  const response = res ? res.response : undefined;
+  if (response && response.data && response.status === 400) {
+      notify.error(response.data && response.data.message ? response.data.message : 'Something went wrong, please try again later.')
   } else {
-    // Handle non-Axios errors
-    notify.error('An unexpected error occurred');
+      const message = response?.data && response?.data?.message;
+      notify.error(message ? message : 'Something went wrong please try again later.');
   }
-};
+}
 
 export const handleUnauthorize = () => {
   Cookies.remove('authToken');

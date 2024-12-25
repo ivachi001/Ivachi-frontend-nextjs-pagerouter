@@ -3,7 +3,7 @@ import { Layout, Menu, Button, Space, Dropdown } from "antd";
 import { UserOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import styles from "./Header.module.scss";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 
 const { Header: AntHeader } = Layout;
 

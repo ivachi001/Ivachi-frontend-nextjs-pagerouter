@@ -7,8 +7,13 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import styles from "./admin.module.scss";
+import dynamic from "next/dynamic";
 
 const { Sider, Content } = Layout;
+const Header = dynamic(() => import("../Header/Header"), {
+  ssr: true,
+  loading: () => <div style={{ height: "64px" }} />,
+});
 
 export default function AdminLayout({
   children,
@@ -49,12 +54,12 @@ export default function AdminLayout({
       className={`${styles.adminLayout} admin-layout`}
       style={{ width: "100%", margin: 0 }}
     >
+      <Header />
       <Sider
         width={200}
         className={styles.sider}
-        style={{ background: "#1677ff" }}
+        style={{ background: "#1677ff", marginTop: "65px" }}
       >
-        {/* <div className={styles.logo}>Admin Panel</div> */}
         <Menu
           mode="inline"
           defaultSelectedKeys={["products"]}
@@ -62,7 +67,7 @@ export default function AdminLayout({
           className={styles.menu}
         />
       </Sider>
-      <Content className={styles.content} style={{ padding: 0 }}>
+      <Content className={styles.content} style={{ padding: 0, marginTop: "65px" }}>
         {children}
       </Content>
     </Layout>
