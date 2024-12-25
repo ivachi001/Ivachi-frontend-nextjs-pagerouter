@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import styles from "./admin.module.scss";
 import dynamic from "next/dynamic";
+import { useSelector } from "react-redux";
 
 const { Sider, Content } = Layout;
 const Header = dynamic(() => import("../Header/Header"), {
@@ -21,6 +22,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const userData = useSelector((state: any) => state?.userData);
 
   const menuItems = [
     {
@@ -54,19 +56,25 @@ export default function AdminLayout({
       className={`${styles.adminLayout} admin-layout`}
       style={{ width: "100%", margin: 0 }}
     >
-      <Header />
-      <Sider
-        width={200}
-        className={styles.sider}
-        style={{ background: "#1677ff", marginTop: "65px" }}
-      >
-        <Menu
-          mode="inline"
-          defaultSelectedKeys={["products"]}
-          items={menuItems}
-          className={styles.menu}
-        />
-      </Sider>
+      {
+        userData?.isAuthenticated && (
+          <>
+            <Header />
+            <Sider
+              width={200}
+              className={styles.sider}
+              style={{ background: "#1677ff", marginTop: "65px" }}
+            >
+              <Menu
+                mode="inline"
+                defaultSelectedKeys={["products"]}
+                items={menuItems}
+                className={styles.menu}
+              />
+            </Sider>
+          </>
+        )
+      }
       <Content className={styles.content} style={{ padding: 0, marginTop: "65px" }}>
         {children}
       </Content>

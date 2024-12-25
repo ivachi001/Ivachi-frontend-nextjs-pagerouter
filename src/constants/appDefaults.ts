@@ -4,3 +4,8 @@ export const timeConstants = {
     globalSearchDebounce: 500, // In milliseconds
     hidePageLoaderTime: 1000 // In milliseconds
 }
+
+export const hierarchyWiseRoles = {
+    USER: ["user"],
+    ADMIN: ["admin"],
+}

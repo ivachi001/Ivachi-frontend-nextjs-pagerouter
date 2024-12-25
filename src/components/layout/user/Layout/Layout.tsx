@@ -2,7 +2,7 @@ import React from "react";
 import { Layout } from "antd";
 import dynamic from "next/dynamic";
 import styles from "./Layout.module.scss";
- interface MainLayoutProps {
+ interface UserLayoutProps {
     children: React.ReactNode;
 } 
 const { Content } = Layout;
@@ -15,7 +15,7 @@ const Footer = dynamic(() => import("../Footer/Footer"), {
   loading: () => <div style={{ height: "200px" }} />,
 });
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const UserLayout: React.FC<UserLayoutProps> = ({ children }) => {
   return (
     <Layout className={styles.layout}>
       <Header />
@@ -27,4 +27,4 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   );
 };
 
-export default MainLayout;
+export default UserLayout;

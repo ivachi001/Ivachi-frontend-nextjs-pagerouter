@@ -10,6 +10,8 @@ import { notify } from "@/utils/common";
 import axiosHelper from "@/utils/axiosHelper";
 import Cookies from "js-cookie";
 import { API_ENDPOINTS } from "@/constants/apiUrl";
+import { useDispatch } from "react-redux";
+import { clearUserData, setUserData } from "@/store/slices/userDataSlice";
 
 const { Title, Text } = Typography;
 
@@ -18,20 +20,8 @@ interface LoginFormData {
   password: string;
 }
 
-interface LoginResponse {
-  id: number;
-  full_name: string;
-  email: string;
-  phone_no: string;
-  token: string;
-  token_type: string;
-  expires_in: number;
-  role: string | null;
-  role_id: number | null;
-  permissions: string[];
-}
-
 const LoginPage: React.FC = () => {
+  const dispatch = useDispatch();
   const [form] = Form.useForm();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -39,21 +29,25 @@ const LoginPage: React.FC = () => {
   const [loginOtp, setLoginOtp] = useState("");
 
   const handleLogin = async (values: LoginFormData) => {
+
     setLoading(true);
     try {
-      const response = await axiosHelper.post<LoginResponse>(
+      const response = await axiosHelper.post(
         API_ENDPOINTS.LOGIN,
-        values
+        {
+          isAdmin: true,
+          ...values
+        }
       );
 
-      // Store the token
-      Cookies.set('authToken', response.token);
-      
-      notify.success("Login successful");
-      router.push("/admin/dashboard");
+      if (response?.data) {
+        dispatch(setUserData({user: response?.data, isAuthenticated: true}))
+        notify.success(response?.message);
+        router.push("/admin/dashboard");
+        Cookies.set('authToken', response?.data?.token);
+      }
     } catch (error) {
-      // Error is already handled by apiErrors function
-      console.error("Login error:", error);
+      console.log("Login error:", error);
     } finally {
       setLoading(false);
     }
@@ -179,9 +173,9 @@ const LoginPage: React.FC = () => {
               />
             </Form.Item>
 
-            <Form.Item className={styles.forgotPassword}>
+            {/* <Form.Item className={styles.forgotPassword}>
               <Link href="/forgot-password">Forgot password?</Link>
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item>
               <Button
@@ -196,14 +190,12 @@ const LoginPage: React.FC = () => {
               </Button>
             </Form.Item>
 
-            <Divider plain>Or</Divider>
-
-            <div className={styles.register}>
+            {/* <div className={styles.register}>
               <Text>Don't have an account?</Text>&nbsp;
               <Link href="/register" className={styles.registerLink}>
                 Register now
               </Link>
-            </div>
+            </div> */}
           </Form>
         )}
       </Card>

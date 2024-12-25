@@ -55,30 +55,24 @@ class AxiosHelper {
         try {
             let headers: Record<string, string> = this.getAuthHeader();
             let payload: any = data;
-
+    
             if (data instanceof FormData) {
                 headers = {
                     ...headers,
                     'Content-Type': 'multipart/form-data',
                 };
             }
-
-            const response: AxiosResponse<{
-                status: number;
-                message: string;
-                data: T;
-            }> = await this.instance.post(endpoint, payload, {
+    
+            const response: AxiosResponse<T> = await this.instance.post(endpoint, payload, {
                 headers
             });
-
-            return response?.data?.data;
+    
+            return response?.data;  
         } catch (error) {
             if (handleApiErrors) {
                 if (error instanceof AxiosError) {
-                    // Let apiErrors handle the error display and routing
                     apiErrors(error);
                 } else {
-                    // Handle non-Axios errors
                     console.error('Non-Axios error:', error);
                     throw error;
                 }

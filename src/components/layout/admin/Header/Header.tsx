@@ -4,11 +4,17 @@ import { UserOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import styles from "./Header.module.scss";
 import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+import { handleUnauthorizeAdmin } from "@/utils/common";
+import { clearUserData } from "@/store/slices/userDataSlice";
+import { hideAppLoader, showAppLoader } from "@/store/slices/appConfigSlice";
 
 const { Header: AntHeader } = Layout;
 
 const Header: React.FC = () => {
   const router = useRouter();
+  const userData = useSelector((state: any) => state?.userData);
+  const dispatch = useDispatch();
 
   const userMenuItems = [
     {
@@ -19,7 +25,10 @@ const Header: React.FC = () => {
     {
       key: "logout",
       label: "Logout",
-      onClick: () => {},
+      onClick: () => {
+        dispatch(showAppLoader());
+        handleUnauthorizeAdmin()
+      },
     },
   ];
 
@@ -31,14 +40,14 @@ const Header: React.FC = () => {
       {/* <Menu mode="horizontal" className={styles.menu} /> */}
       <Space className={styles.actions} style={{ backgroundColor: "#1677ff" }}>
         <Button icon={<ShoppingCartOutlined />} type="text" />
-        {true ? (
+        {userData?.isAuthenticated ? (
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
             <Button icon={<UserOutlined />} type="text">
-              Admin User
+              {userData?.user?.full_name}
             </Button>
           </Dropdown>
         ) : (
-          <Link href="/login">Sign In</Link>
+          <Link href="/admin/login">Login</Link>
         )}
       </Space>
     </AntHeader>

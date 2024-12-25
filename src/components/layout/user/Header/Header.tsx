@@ -34,7 +34,7 @@ const Header: React.FC = () => {
         {true ? (
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
             <Button icon={<UserOutlined />} type="text">
-              Admin User
+              User
             </Button>
           </Dropdown>
         ) : (
