@@ -1,0 +1,15 @@
+.layout {
+    min-height: 100vh;
+  }
+  
+  .content {
+    padding-top: 64px; // Height of the fixed header
+    min-height: calc(100vh - 64px);
+  }
+  
+  .contentWrapper {
+    // max-width: 1200px;
+    margin: 24px auto;
+    padding: 0 24px;
+  }
+  
