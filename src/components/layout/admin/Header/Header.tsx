@@ -27,7 +27,11 @@ const Header: React.FC = () => {
       label: "Logout",
       onClick: () => {
         dispatch(showAppLoader());
-        handleUnauthorizeAdmin()
+        dispatch(clearUserData());
+        setTimeout(() => {
+          dispatch(hideAppLoader());
+          handleUnauthorizeAdmin()
+        }, 1000)
       },
     },
   ];
@@ -39,16 +43,11 @@ const Header: React.FC = () => {
       </div>
       {/* <Menu mode="horizontal" className={styles.menu} /> */}
       <Space className={styles.actions} style={{ backgroundColor: "#1677ff" }}>
-        <Button icon={<ShoppingCartOutlined />} type="text" />
-        {userData?.isAuthenticated ? (
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Button icon={<UserOutlined />} type="text">
-              {userData?.user?.full_name}
-            </Button>
-          </Dropdown>
-        ) : (
-          <Link href="/admin/login">Login</Link>
-        )}
+        <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+          <Button icon={<UserOutlined />} type="text">
+            {userData?.user?.full_name}
+          </Button>
+        </Dropdown>
       </Space>
     </AntHeader>
   );

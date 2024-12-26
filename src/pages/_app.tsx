@@ -9,21 +9,27 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '@/store';
 import AppLoader from "@/components/common/AppLoader";
+import Auth from "@/components/Auth";
+import { useRouter } from "next/router";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
-
-  useEffect(() => {
-    // Get user role from cookies or your auth system
-    const role = Cookies.get('userRole');
-    setUserRole(role as 'admin' | 'user' || 'admin'); // Default to user if no role found
-  }, []);
+  const router = useRouter();
 
   const getLayout = () => {
-    if (userRole === 'admin') {
+    const path: any = router.pathname;
+    const isAdminSection = path.startsWith('/admin');
+    if (isAdminSection) {
       return (
         <AdminLayout>
-          <Component {...pageProps} />
+          {
+            // @ts-ignore
+            Component?.protected ?
+              <Auth>
+                <Component {...pageProps} />
+              </Auth>
+              :
+              <Component {...pageProps} />
+          }
         </AdminLayout>
       );
     }

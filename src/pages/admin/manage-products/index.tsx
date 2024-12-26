@@ -13,6 +13,7 @@ import {
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import styles from "./manage-products.module.scss";
 import { required, maxLength, minLength } from "@/utils/formValidation";
+import { AppPageProps } from "@/types";
 
 const { Option } = Select;
 
@@ -53,7 +54,7 @@ const mockProducts: Product[] = Array.from({ length: 50 }, (_, index) => ({
   imageUrl: `https://picsum.photos/200/300?random=${index + 1}`,
 }));
 
-const ManageProductsPage: React.FC = () => {
+const ManageProductsPage: AppPageProps = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const [form] = Form.useForm();
@@ -297,4 +298,5 @@ const ManageProductsPage: React.FC = () => {
   );
 };
 
+ManageProductsPage.protected = true;
 export default ManageProductsPage;

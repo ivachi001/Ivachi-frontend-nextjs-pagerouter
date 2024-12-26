@@ -1,39 +1,45 @@
 import React from "react";
-import { Card, Col, Row, Typography } from "antd";
-import styles from "./dashboard.module.scss"; // Create this file for styling
+import { Typography } from "antd";
+import styles from "./dashboard.module.scss";
+import { AppPageProps } from "@/types";
+import MetricsOverview from "@/components/dashboard/MetricsOverview";
+import CustomerCountGraph from "@/components/dashboard/CustomerCountGraph";
+import ProductSalesGraph from "@/components/dashboard/ProductSalesGraph";
+import ContactQueryGraph from "@/components/dashboard/ContactQueryGraph";
+import ReviewsGraph from "@/components/dashboard/ReviewsGraph";
 
 const { Title } = Typography;
 
-const DashboardPage: React.FC = () => {
+const DashboardPage: AppPageProps = () => {
   return (
     <div className={styles.dashboardContainer}>
-      <Title level={2}>Admin Dashboard</Title>
-      <Row gutter={16}>
-        <Col span={8}>
-          <Card title="Total Users" bordered={false}>
-            <p>100</p>
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card title="Total Products" bordered={false}>
-            <p>250</p>
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card title="Total Categories" bordered={false}>
-            <p>15</p>
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={16} style={{ marginTop: 16 }}>
-        <Col span={24}>
-          <Card title="Recent Activity" bordered={false}>
-            <p>No recent activity to display.</p>
-          </Card>
-        </Col>
-      </Row>
+      <Title level={2}>Dashboard Overview</Title>
+      
+      {/* Metrics Overview */}
+      <MetricsOverview />
+
+      {/* Customer Analysis */}
+      <div style={{ marginTop: 24 }}>
+        <CustomerCountGraph />
+      </div>
+
+      {/* Product Sales */}
+      <div style={{ marginTop: 24 }}>
+        <ProductSalesGraph />
+      </div>
+
+      {/* Contact Queries */}
+      <div style={{ marginTop: 24 }}>
+        <ContactQueryGraph />
+      </div>
+
+      {/* Reviews Analysis */}
+      <div style={{ marginTop: 24 }}>
+        <ReviewsGraph />
+      </div>
     </div>
   );
 };
 
+DashboardPage.protected = true;
 export default DashboardPage;

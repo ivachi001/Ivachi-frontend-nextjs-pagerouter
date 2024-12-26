@@ -1,42 +1,88 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Table, Button, Drawer, Tag, Space, Switch, Select } from 'antd';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Table, Button, Drawer, Tag, Space, Form, Input, message, Select, Modal, Upload } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import styles from './manage-users.module.scss';
+import { AppPageProps } from '@/types';
+import { API_ENDPOINTS } from '@/constants/apiUrl';
+import axiosHelper from '@/utils/axiosHelper';
+import { notify } from '@/utils/common';
+import { maxLength, minLength, required, checkEmail } from '@/utils/formValidation';
+import { SearchOutlined, ExclamationCircleOutlined, UploadOutlined } from '@ant-design/icons';
+import { debounce } from 'lodash';
 
 interface User {
   id: number;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: 'admin' | 'regular';
-  status: 'active' | 'inactive';
-  // joinDate: string;
-  // lastLogin: string;
+  phone_no: string;
+  role_id: number;
+  profile_doc?: string;
 }
 
-// Mock user data
-const mockUsers: User[] = Array.from({ length: 50 }, (_, index) => ({
-  id: index + 1,
-  name: `User ${index + 1}`,
-  email: `user${index + 1}@example.com`,
-  role: index  % 2 === 0 ? 'admin' : 'regular',
-  status: index  % 2 === 0 ? 'active' : 'inactive',
-  // joinDate: new Date(Date.now() - Math.random() * 10000000000).toISOString().split('T')[0],
-  // lastLogin: new Date(Date.now() - Math.random() * 1000000000).toISOString().split('T')[0],
-}));
+const { confirm } = Modal;
 
-const ManageUsersPage: React.FC = () => {
+const ManageUsersPage: AppPageProps = () => {
+  const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({ 
+    current: 1, 
+    pageSize: 10,
+    total: 0 
+  });
+  const [userForm] = Form.useForm();
+  const [searchText, setSearchText] = useState('');
+
+  const fetchUsers = async (page = 1, perPage = 10, search = '') => {
+    try {
+      setLoading(true);
+      const response: any = await axiosHelper.get(API_ENDPOINTS.USER_ACTIONS, {
+        page,
+        per_page: perPage,
+        search
+      });
+
+      if (response?.list_data) {
+        setUsers(response.list_data);
+        setPagination({
+          current: response.page,
+          pageSize: response.per_page,
+          total: response.total_records
+        });
+      }
+    } catch (error: any) {
+      notify.error(error?.message || 'Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const debouncedSearch = useMemo(
+    () => debounce((value: string) => {
+      setSearchText(value);
+      setPagination(prev => ({
+        ...prev,
+        current: 1
+      }));
+      fetchUsers(1, pagination.pageSize, value);
+    }, 500),
+    [pagination.pageSize]
+  );
 
   const columns: ColumnsType<User> = [
     {
       title: 'Name',
-      dataIndex: 'name',
       key: 'name',
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (_, record) => `${record.first_name} ${record.last_name}`,
+      sorter: (a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`),
     },
     {
       title: 'Email',
@@ -44,85 +90,190 @@ const ManageUsersPage: React.FC = () => {
       key: 'email',
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      render: (role) => (
-        <Tag color={role === 'admin' ? 'blue' : 'default'}>
-          {role.toUpperCase()}
-        </Tag>
-      ),
-      filters: [
-        { text: 'Admin', value: 'admin' },
-        { text: 'Regular', value: 'regular' },
-      ],
-      onFilter: (value, record) => record.role === value,
+      title: 'Phone',
+      dataIndex: 'phone_no',
+      key: 'phone_no',
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Tag color={status === 'active' ? 'green' : 'red'}>
-          {status.toUpperCase()}
+      title: 'Role',
+      dataIndex: 'role_id',
+      key: 'role_id',
+      render: (role_id) => (
+        <Tag color={role_id === 1 ? 'blue' : 'default'}>
+          {role_id === 1 ? 'ADMIN' : 'USER'}
         </Tag>
       ),
-      filters: [
-        { text: 'Active', value: 'active' },
-        { text: 'Inactive', value: 'inactive' },
-      ],
-      onFilter: (value, record) => record.status === value,
     },
-    // {
-    //   title: 'Join Date',
-    //   dataIndex: 'joinDate',
-    //   key: 'joinDate',
-    //   sorter: (a, b) => new Date(a.joinDate).getTime() - new Date(b.joinDate).getTime(),
-    // },
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <Space>
-          <Button type="primary" onClick={(e) => {
-            e.stopPropagation();
-            handleEdit(record);
-          }}>
+          <Button
+            type="primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(record);
+            }}
+          >
             Edit
+          </Button>
+          <Button
+            type="primary"
+            danger
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteUser(record);
+            }}
+          >
+            Delete
           </Button>
         </Space>
       ),
     },
   ];
 
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
-    setDrawerVisible(true);
+  const handleAddUser = async (values: any) => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      
+      Object.keys(values).forEach(key => {
+        if (key === 'profile_doc' && values[key]?.fileList?.[0]) {
+          formData.append('profile_doc', values[key].fileList[0].originFileObj);
+        } else {
+          formData.append(key, values[key]);
+        }
+      });
+
+      const response = await axiosHelper.post(API_ENDPOINTS.CREATE_USER, formData);
+
+      if (response?.data) {
+        notify.success('User added successfully!');
+        setDrawerVisible(false);
+        userForm.resetFields();
+        fetchUsers();
+      }
+    } catch (error: any) {
+      notify.error(error?.message || 'Failed to add user');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRowClick = (record: User) => {
-    setSelectedUser(record);
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    userForm.setFieldsValue(user);
     setDrawerVisible(true);
   };
 
   const handleTableChange = (newPagination: TablePaginationConfig) => {
-    setPagination({
-      current: newPagination.current || 1,
-      pageSize: newPagination.pageSize || 10,
+    fetchUsers(
+      newPagination.current || 1,
+      newPagination.pageSize || 10
+    );
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerVisible(false);
+    setSelectedUser(null);
+    userForm.resetFields();
+  };
+
+  const handleUpdateUser = async (values: any) => {
+    if (!selectedUser) return;
+    
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      
+      Object.keys(values).forEach(key => {
+        if (key === 'profile_doc' && values[key]?.fileList?.[0]) {
+          formData.append('profile_doc', values[key].fileList[0].originFileObj);
+        } else {
+          formData.append(key, values[key]);
+        }
+      });
+
+      const response = await axiosHelper.put(
+        `${API_ENDPOINTS.UPDATE_USER}/${selectedUser.id}`,
+        formData
+      );
+
+      if (response?.data) {
+        notify.success('User updated successfully!');
+        setDrawerVisible(false);
+        userForm.resetFields();
+        fetchUsers(pagination.current, pagination.pageSize, searchText);
+      }
+    } catch (error: any) {
+      notify.error(error?.message || 'Failed to update user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = (user: User) => {
+    confirm({
+      title: 'Are you sure you want to delete this user?',
+      icon: <ExclamationCircleOutlined />,
+      content: 'This action cannot be undone.',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk: async () => {
+        try {
+          setLoading(true);
+          const response = await axiosHelper.delete(
+            `${API_ENDPOINTS.USER_ACTIONS}/${user.id}`
+          );
+
+          if (response?.data) {
+            notify.success('User deleted successfully!');
+            fetchUsers(pagination.current, pagination.pageSize, searchText);
+          }
+        } catch (error: any) {
+          notify.error(error?.message || 'Failed to delete user');
+        } finally {
+          setLoading(false);
+        }
+      },
     });
+  };
+
+  const onFinish = (values: any) => {
+    if (selectedUser) {
+      handleUpdateUser(values);
+    } else {
+      handleAddUser(values);
+    }
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Manage Users</h1>
-        <Button type="primary">Add New User</Button>
+        <Button type="primary" onClick={() => setDrawerVisible(true)}>
+          Add New User
+        </Button>
+      </div>
+
+      <div className={styles.tableActions}>
+        <Input
+          placeholder="Search users..."
+          prefix={<SearchOutlined />}
+          allowClear
+          onChange={(e) => debouncedSearch(e.target.value)}
+          style={{ width: 300, marginBottom: 16 }}
+          size="large"
+        />
       </div>
 
       <Table
         columns={columns}
-        dataSource={mockUsers}
+        dataSource={users}
         rowKey="id"
+        loading={loading}
         onChange={handleTableChange}
         pagination={{
           ...pagination,
@@ -130,65 +281,92 @@ const ManageUsersPage: React.FC = () => {
           showTotal: (total) => `Total ${total} users`,
           pageSizeOptions: ['10', '20', '50'],
         }}
-        onRow={(record) => ({
-          onClick: () => handleRowClick(record),
-        })}
       />
 
       <Drawer
-        title="User Details"
+        title={selectedUser ? "Edit User" : "Add New User"}
         placement="right"
-        width={500}
-        onClose={() => setDrawerVisible(false)}
+        width={400}
+        onClose={handleCloseDrawer}
         open={drawerVisible}
+        destroyOnClose={true}
       >
-        {selectedUser && (
-          <div className={styles.userDetails}>
-            <div className={styles.detailRow}>
-              <strong>Name:</strong>
-              <span>{selectedUser.name}</span>
-            </div>
+        <Form
+          form={userForm}
+          onFinish={onFinish}
+          layout="vertical"
+          requiredMark={false}
+        >
+          <Form.Item
+            name="first_name"
+            label="First Name"
+            rules={[required("Please input first name!"), minLength(2), maxLength(50)]}
+          >
+            <Input placeholder="First Name" />
+          </Form.Item>
 
-            <div className={styles.detailRow}>
-              <strong>Email:</strong>
-              <span>{selectedUser.email}</span>
-            </div>
+          <Form.Item
+            name="last_name"
+            label="Last Name"
+            rules={[required("Please input last name!"), minLength(2), maxLength(50)]}
+          >
+            <Input placeholder="Last Name" />
+          </Form.Item>
 
-            <div className={styles.detailRow}>
-              <strong>Role:</strong>
-              <Select
-                defaultValue={selectedUser.role}
-                style={{ width: 120 }}
-                options={[
-                  { value: 'admin', label: 'Admin' },
-                  { value: 'regular', label: 'Regular' },
-                ]}
-              />
-            </div>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[required("Please input email!"), checkEmail()]}
+          >
+            <Input placeholder="Email" />
+          </Form.Item>
 
-            <div className={styles.detailRow}>
-              <strong>Status:</strong>
-              <Switch
-                checked={selectedUser.status === 'active'}
-                checkedChildren="Active"
-                unCheckedChildren="Inactive"
-              />
-            </div>
+          <Form.Item
+            name="phone_no"
+            label="Phone Number"
+            rules={[required("Please input phone number!"), maxLength(15)]}
+          >
+            <Input placeholder="Phone Number" />
+          </Form.Item>
 
-            <div className={styles.detailRow}>
-              <strong>Join Date:</strong>
-              {/* <span>{selectedUser.joinDate}</span> */}
-            </div>
+          <Form.Item
+            name="role_id"
+            label="Role"
+            rules={[required("Please select role!")]}
+          >
+            <Select
+              options={[
+                { value: 1, label: 'Admin' },
+                { value: 2, label: 'User' },
+              ]}
+            />
+          </Form.Item>
 
-            <div className={styles.detailRow}>
-              <strong>Last Login:</strong>
-              {/* <span>{selectedUser.lastLogin}</span> */}
-            </div>
-          </div>
-        )}
+          <Form.Item
+            name="profile_doc"
+            label="Profile Image"
+            valuePropName="file"
+          >
+            <Upload
+              maxCount={1}
+              beforeUpload={() => false}
+              accept="image/*"
+              listType="picture"
+            >
+              <Button icon={<UploadOutlined />}>Upload Profile Image</Button>
+            </Upload>
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} block>
+              {selectedUser ? 'Update User' : 'Add User'}
+            </Button>
+          </Form.Item>
+        </Form>
       </Drawer>
     </div>
   );
 };
 
+ManageUsersPage.protected = true;
 export default ManageUsersPage; 

@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
       );
 
       if (response?.data) {
-        dispatch(setUserData({user: response?.data, isAuthenticated: true}))
+        dispatch(setUserData({user: {...response?.data, role: "admin"}, isAuthenticated: true}))
         notify.success(response?.message);
         router.push("/admin/dashboard");
         Cookies.set('authToken', response?.data?.token);

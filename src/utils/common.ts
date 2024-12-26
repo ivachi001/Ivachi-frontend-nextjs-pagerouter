@@ -10,15 +10,9 @@ export const notify = {
 };
 
 export const isAuthorized = (currentUserRole: any, allRoles: any) => {
-  // console.log('isAuthorized: ', currentUserRole, allRoles);
-  if (currentUserRole?.length && allRoles?.length) {
-    // return true;
-    for (let i = 0; i < currentUserRole.length; i++) {
-      for (let j = 0; j < allRoles.length; j++) {
-        if (allRoles[j].includes(currentUserRole[i])) {
-          return true; // Value found, return true
-        }
-      }
+  if (currentUserRole && allRoles?.length) {
+    if (allRoles.includes(currentUserRole)) {
+      return true; // Value found, return true
     }
     return false; // No matching value found
   }
@@ -51,10 +45,10 @@ export const handleUnauthorizeUser = () => {
 
 export const handleUnauthorizeAdmin = () => {
   Cookies.remove('authToken')
-  localStorage.clear()
+  // localStorage.clear()
   // localStorage.removeItem("persist:root");
-  sessionStorage.clear();
-  window.location.href = "/admin/login"
+  // sessionStorage.clear();
+  // window.location.href = "/admin/login"
 }
 
 //Keydown validations

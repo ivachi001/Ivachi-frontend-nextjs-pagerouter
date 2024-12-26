@@ -1,45 +1,57 @@
-import React, { useEffect, useState } from 'react'
-
+import React from 'react';
 import { useRouter } from 'next/router';
-
 import { isAuthorized } from '@/utils/common';
 import { appRoutes } from '@/constants/routes';
 import AppLoader from './common/AppLoader';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
-export default function Auth(props: any) {
+export default function Auth(props: { children: React.ReactNode }) {
   const router = useRouter();
-  const path: any = router.pathname;
-  // console.log('router',router, path);
-  let { children }: any = props;
+  const path = router.pathname;
+  const { children } = props;
 
-  const sessionState:any = null;
-  const { data: session, status } = sessionState;
-  //@ts-ignore
-  const currentUserRole = sessionState?.data?.user?.role_name.length ? sessionState?.data?.user?.role_name : null;
+  const userData = useSelector((state: RootState) => state?.userData);
+  const isUserLoggedIn = !!userData?.user?.token;
+  const currentUserRole = userData?.user?.role || null;
 
-  const isUser = !!session?.user;
-  let componentRoles: any = appRoutes[path];
-
-  // return;
+  let componentRoles: string[] = appRoutes[path];
   let isAccessible = isAuthorized(currentUserRole, componentRoles);
 
-  useEffect(() => {
-
-    if (status === "loading") return
-    if (!isUser) {
-      router.push('/login')
+  // Handle login redirects based on path and role
+  const getLoginRedirect = () => {
+    // Check if current path is in admin section
+    const isAdminSection = path.startsWith('/admin');
+    
+    // Redirect to appropriate login page
+    if (isAdminSection) {
+      router.push('/admin/login');
+    } else {
+      router.push('/login');
     }
+  };
 
-  }, [isUser, status])
+  React.useEffect(() => {
+    if (!isUserLoggedIn) {
+      getLoginRedirect();
+    }
+  }, [isUserLoggedIn, path]);
 
-  if (isUser && isAccessible) {
-    return children
+  // Show loader while checking authentication
+  if (!isUserLoggedIn) {
+    return <AppLoader />;
   }
 
-  //Redirect to respective home page if the unauthorized user tries to access page. 
-  if (isUser && !isAccessible) {
-    router.push('/apps');
+  // Allow access if user is logged in and has proper role
+  if (isUserLoggedIn && isAccessible) {
+    return children;
   }
 
-  return <AppLoader />
+  // Redirect to 404 if user is logged in but doesn't have access
+  if (isUserLoggedIn && !isAccessible) {
+    router.push('/404');
+    return <AppLoader />;
+  }
+
+  return <AppLoader />;
 }

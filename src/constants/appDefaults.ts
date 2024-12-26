@@ -6,6 +6,6 @@ export const timeConstants = {
 }
 
 export const hierarchyWiseRoles = {
-    USER: ["user"],
-    ADMIN: ["admin"],
+    USER: "user",
+    ADMIN: "admin",
 }

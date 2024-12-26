@@ -24,7 +24,7 @@ const AppLoader: React.FC = () => {
         left: 0,
         width: "100%",
         height: "100vh",
-        background: "rgba(255, 255, 255, 0.8)",
+        background: "rgba(255, 255, 255, 1)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
