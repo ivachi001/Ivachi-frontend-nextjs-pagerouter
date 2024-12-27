@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, theme } from 'antd';
 import AdminLayout from "@/components/layout/admin/Layout/layout";
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
@@ -11,6 +11,7 @@ import { store, persistor } from '@/store';
 import AppLoader from "@/components/common/AppLoader";
 import Auth from "@/components/Auth";
 import { useRouter } from "next/router";
+import { appTheme } from "@/constants/appDefaults";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -44,7 +45,18 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <ConfigProvider>
+        <ConfigProvider
+          theme={{
+            token: {
+              colorPrimary: appTheme.primaryColor,
+              colorPrimaryHover: appTheme.primaryColor,
+              colorPrimaryActive: appTheme.primaryColor, 
+              // secondaryColor: appTheme.secondaryColor,
+              // secondaryColorHover: appTheme.secondaryColor,
+              // secondaryColorActive: appTheme.secondaryColor,  
+            },
+          }}
+        >
           <AppLoader />
           {getLayout()}
         </ConfigProvider>

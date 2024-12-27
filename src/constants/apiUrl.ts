@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
   CATEGORY: `${BASE_URL}/category`,
   CREATE_CATEGORY: `${BASE_URL}/category/create`,
   UPDATE_CATEGORY: `${BASE_URL}/category/update`,
+  UPDATE_CATEGORY_STATUS: `${BASE_URL}/category/update-status`,
   DELETE_CATEGORY: `${BASE_URL}/category/delete`,
 
   //Users

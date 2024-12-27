@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { handleUnauthorizeAdmin } from "@/utils/common";
 import { clearUserData } from "@/store/slices/userDataSlice";
 import { hideAppLoader, showAppLoader } from "@/store/slices/appConfigSlice";
+import { appTheme } from "@/constants/appDefaults";
 
 const { Header: AntHeader } = Layout;
 
@@ -38,11 +39,10 @@ const Header: React.FC = () => {
 
   return (
     <AntHeader className={styles.header}>
-      <div className={styles.logo} style={{ backgroundColor: "#1677ff" }}>
-        <Link href="/">E-Commerce</Link>
+      <div className={styles.logo} style={{height: '50px'}}>
+        <img src="/images/ivachi-logo.png" alt="logo" style={{height: '100%'}} />
       </div>
-      {/* <Menu mode="horizontal" className={styles.menu} /> */}
-      <Space className={styles.actions} style={{ backgroundColor: "#1677ff" }}>
+      <Space className={styles.actions} style={{height: '50px'}}>
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
           <Button icon={<UserOutlined />} type="text">
             {userData?.user?.full_name}

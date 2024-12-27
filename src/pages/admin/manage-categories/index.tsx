@@ -259,8 +259,8 @@ const ManageCategoriesPage: AppPageProps = () => {
   const handleStatusChange = async (categoryId: number, status: boolean) => {
     try {
       setLoading(true);
-      const response = await axiosHelper.put(
-        `${API_ENDPOINTS.UPDATE_CATEGORY}/${categoryId}`,
+      const response = await axiosHelper.patch(
+        `${API_ENDPOINTS.UPDATE_CATEGORY_STATUS}/${categoryId}`,
         {
           status
         }

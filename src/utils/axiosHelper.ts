@@ -1,35 +1,35 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import Cookies from 'js-cookie';
 import { apiErrors } from './common';
+import { store } from '@/store';
+import { clearUserData } from '@/store/slices/userDataSlice';
 
 class AxiosHelper {
     instance: AxiosInstance;
 
     constructor() {
         this.instance = axios.create({
-            timeout: 50000,
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            }
+            timeout: 50000
         });
 
-        // Response interceptor
-        // this.instance.interceptors.response.use(
-        //     (response) => response,
-        //     (error: AxiosError) => {
-        //         // Handle 401 unauthorized globally
-        //         if (error.response?.status === 401) {
-        //             const token = Cookies.get('authToken');
-        //             // Only handle 401 if user was previously authenticated
-        //             if (token) {
-        //                 Cookies.remove('authToken');
-        //                 window.location.href = '/login';
-        //             }
-        //         }
-        //         return Promise.reject(error);
-        //     }
-        // );
+
+        this.instance = axios.create({
+            timeout: 50000, // set timeout to 50 seconds
+        });
+
+        this.instance.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                const state = store.getState();
+                const { isAuthenticated } = state.userData;
+                if (error.response && error.response.status === 401 && isAuthenticated) {
+                    // Handle 401 error by logging out
+                    store.dispatch(clearUserData());
+                    Cookies.remove('authToken');
+                }
+                return Promise.reject(error);
+            }
+        );
     }
 
     async get<T = any>(endpoint: string, params?: any, handleApiErrors: boolean = true): Promise<T> {

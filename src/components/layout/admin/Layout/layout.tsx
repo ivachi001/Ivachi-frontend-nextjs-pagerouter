@@ -12,6 +12,7 @@ import {
 import styles from "./admin.module.scss";
 import dynamic from "next/dynamic";
 import { useSelector } from "react-redux";
+import { appTheme } from "@/constants/appDefaults";
 
 const { Sider, Content } = Layout;
 const Header = dynamic(() => import("../Header/Header"), {
@@ -83,7 +84,7 @@ export default function AdminLayout({
           <Sider
             width={200}
             className={styles.sider}
-            style={{ background: "#1677ff", marginTop: "65px" }}
+            style={{ background: appTheme.primaryColor, marginTop: '65px' }}
           >
             <Menu
               mode="inline"
