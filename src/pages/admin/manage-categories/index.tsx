@@ -56,8 +56,7 @@ const ManageCategoriesPage: AppPageProps = () => {
         API_ENDPOINTS.CATEGORY,
         {
           page,
-          // per_page: perPage,
-          per_page: 3,
+          per_page: perPage,
           search
         }
       );      
