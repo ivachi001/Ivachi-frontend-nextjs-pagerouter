@@ -7,6 +7,7 @@ import {
   MoneyCollectOutlined,
   DashboardOutlined,
   SettingOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 import styles from "./admin.module.scss";
 import dynamic from "next/dynamic";
@@ -35,7 +36,7 @@ export default function AdminLayout({
     },
     {
       key: "customers",
-      icon: <UserOutlined />,
+      icon: <UsergroupAddOutlined />,
       label: "Customers",
       onClick: () => router.push("/admin/manage-customers"),
     },
@@ -59,9 +60,15 @@ export default function AdminLayout({
     },
     {
       key: "users",
-      icon: <UsergroupAddOutlined />,
+      icon: <UserOutlined />,
       label: "Users",
       onClick: () => router.push("/admin/manage-users"),
+    },
+    {
+      key: "roles",
+      icon: <LoginOutlined />,
+      label: "Roles",
+      onClick: () => router.push("/admin/manage-roles"),
     },
   ];
 

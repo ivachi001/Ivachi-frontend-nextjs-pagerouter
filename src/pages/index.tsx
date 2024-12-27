@@ -1,23 +1,15 @@
-import Head from "next/head";
-import Image from "next/image";
-import styles from "@/styles/Home.module.css";
+// pages/index.tsx
 
-
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 export default function Home() {
-  return (
-    <>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-      <p>Home page</p>
-    </>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to /admin/login when the root URL is accessed
+    router.push("/admin/login");
+  }, [router]);
+
+  return null; // You can display a loading state here if needed.
 }

@@ -19,4 +19,7 @@ export const appRoutes: any = {
     "/admin/manage-coupons": [
         hierarchyWiseRoles.ADMIN
     ],
+    "/admin/manage-roles": [
+        hierarchyWiseRoles.ADMIN
+    ],
 }

@@ -20,6 +20,7 @@ import { notify } from "@/utils/common";
 import { required, maxLength } from "@/utils/formValidation";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
+import { DefaultOptionType } from "antd/es/select";
 
 interface Customer {
   id: number;
@@ -50,6 +51,9 @@ const ManageCustomersPage: AppPageProps = () => {
   });
   const [customerForm] = Form.useForm();
   const [searchText, setSearchText] = useState("");
+  const [countries, setCountries] = useState<any[]>([]);
+  const [states, setStates] = useState<any[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
 
   const fetchCustomers = async (page = 1, perPage = 10, search = "") => {
     try {
@@ -90,8 +94,40 @@ const ManageCustomersPage: AppPageProps = () => {
     }
   };
 
+  const fetchCountries = async () => {
+    try {
+      const response: any = await axiosHelper.get(API_ENDPOINTS.COUNTRY_LIST);
+      setCountries(response);
+    } catch (error: any) {
+      notify.error(error?.message || "Failed to fetch countries");
+    }
+  };
+
+  const fetchStates = async (countryId: number) => {
+    try {
+      const response: any = await axiosHelper.get(
+        `${API_ENDPOINTS.STATE_LIST}/${countryId}`
+      );
+      setStates(response);
+    } catch (error: any) {
+      notify.error(error?.message || "Failed to fetch states");
+    }
+  };
+
+  const fetchCities = async (stateId: number) => {
+    try {
+      const response: any = await axiosHelper.get(
+        `${API_ENDPOINTS.CITY_LIST}/${stateId}`
+      );
+      setCities(response);
+    } catch (error: any) {
+      notify.error(error?.message || "Failed to fetch cities");
+    }
+  };
+
   useEffect(() => {
     fetchCustomers();
+    fetchCountries(); // Fetch countries on component mount
   }, []);
 
   const debouncedSearch = useMemo(
@@ -154,6 +190,8 @@ const ManageCustomersPage: AppPageProps = () => {
         ...customer,
         dob: customer.dob ? dayjs(customer.dob, "YYYY-MM-DD") : null,
       });
+      fetchStates(customer.country_id); // Fetch states based on the selected country
+      fetchCities(customer.state_id); // Fetch cities based on the selected state
       setDrawerVisible(true);
     }
   };
@@ -166,6 +204,8 @@ const ManageCustomersPage: AppPageProps = () => {
     setDrawerVisible(false);
     setSelectedCustomer(null);
     customerForm.resetFields();
+    setStates([]); // Reset states
+    setCities([]); // Reset cities
   };
 
   const handleUpdateCustomer = async (values: any) => {
@@ -306,46 +346,114 @@ const ManageCustomersPage: AppPageProps = () => {
 
           <Form.Item
             name="country_id"
-            label="Country ID"
+            label="Country"
             rules={[required("Please select country!")]}
           >
-            <Select placeholder="Select Country">
-              {/* Populate with actual country options */}
-              <Select.Option value={1}>Country 1</Select.Option>
-              <Select.Option value={2}>Country 2</Select.Option>
+            <Select
+              placeholder="Select Country"
+              onChange={(value) => {
+                customerForm.setFieldsValue({
+                  state_id: undefined,
+                  city_id: undefined,
+                }); // Reset state and city
+                fetchStates(value); // Fetch states based on selected country
+              }}
+              showSearch
+              allowClear
+              filterOption={(
+                input: string,
+                option: DefaultOptionType | undefined
+              ) =>
+                // @ts-ignore
+                (option?.children.toLowerCase() ?? "").includes(
+                  input.toLowerCase()
+                )
+              }
+            >
+              {countries.map((country) => (
+                <Select.Option key={country.id} value={country.id}>
+                  {country.name}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
 
           <Form.Item
             name="state_id"
-            label="State ID"
+            label="State"
             rules={[required("Please select state!")]}
           >
-            <Select placeholder="Select State">
-              {/* Populate with actual state options */}
-              <Select.Option value={1}>State 1</Select.Option>
-              <Select.Option value={2}>State 2</Select.Option>
+            <Select
+              placeholder="Select State"
+              onChange={(value) => {
+                customerForm.setFieldsValue({ city_id: undefined }); // Reset city
+                fetchCities(value); // Fetch cities based on selected state
+              }}
+              showSearch
+              allowClear
+              filterOption={(
+                input: string,
+                option: DefaultOptionType | undefined
+              ) =>
+                // @ts-ignore
+                (option?.children.toLowerCase() ?? "").includes(
+                  input.toLowerCase()
+                )
+              }
+            >
+              {states.map((state) => (
+                <Select.Option key={state.id} value={state.id}>
+                  {state.name}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
 
           <Form.Item
             name="city_id"
-            label="City ID"
+            label="City"
             rules={[required("Please select city!")]}
           >
-            <Select placeholder="Select City">
-              {/* Populate with actual city options */}
-              <Select.Option value={1}>City 1</Select.Option>
-              <Select.Option value={2}>City 2</Select.Option>
+            <Select
+              placeholder="Select City"
+              showSearch
+              allowClear
+              filterOption={(
+                input: string,
+                option: DefaultOptionType | undefined
+              ) =>
+                // @ts-ignore
+                (option?.children.toLowerCase() ?? "").includes(
+                  input.toLowerCase()
+                )
+              }
+            >
+              {cities.map((city) => (
+                <Select.Option key={city.id} value={city.id}>
+                  {city.name}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
-
           <Form.Item
             name="status"
             label="Status"
             rules={[required("Please select status!")]}
           >
-            <Select placeholder="Select Status">
+            <Select
+              placeholder="Select Status"
+              showSearch
+              allowClear
+              filterOption={(
+                input: string,
+                option: DefaultOptionType | undefined
+              ) =>
+                // @ts-ignore
+                (option?.children.toLowerCase() ?? "").includes(
+                  input.toLowerCase()
+                )
+              }
+            >
               <Select.Option value={1}>Active</Select.Option>
               <Select.Option value={0}>Inactive</Select.Option>
             </Select>
