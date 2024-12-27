@@ -1,4 +1,4 @@
-import {  hierarchyWiseRoles } from "./appDefaults";
+import { hierarchyWiseRoles } from "./appDefaults";
 
 export const appRoutes: any = {
     "/admin/dashboard": [
@@ -6,11 +6,17 @@ export const appRoutes: any = {
     ],
     "/admin/manage-categories": [
         hierarchyWiseRoles.ADMIN
-    ], 
+    ],
     "/admin/manage-products": [
         hierarchyWiseRoles.ADMIN
     ],
     "/admin/manage-users": [
         hierarchyWiseRoles.ADMIN
-    ],  
+    ],
+    "/admin/manage-customers": [
+        hierarchyWiseRoles.ADMIN
+    ],
+    "/admin/manage-coupons": [
+        hierarchyWiseRoles.ADMIN
+    ],
 }

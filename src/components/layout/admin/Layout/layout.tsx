@@ -3,6 +3,8 @@ import { Layout, Menu } from "antd";
 import {
   ShoppingOutlined,
   UserOutlined,
+  UsergroupAddOutlined,
+  MoneyCollectOutlined,
   DashboardOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
@@ -32,10 +34,16 @@ export default function AdminLayout({
       onClick: () => router.push("/admin/dashboard"),
     },
     {
-      key: "users",
+      key: "customers",
       icon: <UserOutlined />,
-      label: "Users",
-      onClick: () => router.push("/admin/manage-users"),
+      label: "Customers",
+      onClick: () => router.push("/admin/manage-customers"),
+    },
+    {
+      key: "coupons",
+      icon: <MoneyCollectOutlined />,
+      label: "Coupons",
+      onClick: () => router.push("/admin/manage-coupons"),
     },
     {
       key: "categories",
@@ -49,6 +57,12 @@ export default function AdminLayout({
       label: "Products",
       onClick: () => router.push("/admin/manage-products"),
     },
+    {
+      key: "users",
+      icon: <UsergroupAddOutlined />,
+      label: "Users",
+      onClick: () => router.push("/admin/manage-users"),
+    },
   ];
 
   return (
@@ -56,26 +70,27 @@ export default function AdminLayout({
       className={`${styles.adminLayout} admin-layout`}
       style={{ width: "100%", margin: 0 }}
     >
-      {
-        userData?.isAuthenticated && (
-          <>
-            <Header />
-            <Sider
-              width={200}
-              className={styles.sider}
-              style={{ background: "#1677ff", marginTop: "65px" }}
-            >
-              <Menu
-                mode="inline"
-                defaultSelectedKeys={["products"]}
-                items={menuItems}
-                className={styles.menu}
-              />
-            </Sider>
-          </>
-        )
-      }
-      <Content className={styles.content} style={{ padding: 0, marginTop: "65px" }}>
+      {userData?.isAuthenticated && (
+        <>
+          <Header />
+          <Sider
+            width={200}
+            className={styles.sider}
+            style={{ background: "#1677ff", marginTop: "65px" }}
+          >
+            <Menu
+              mode="inline"
+              defaultSelectedKeys={["products"]}
+              items={menuItems}
+              className={styles.menu}
+            />
+          </Sider>
+        </>
+      )}
+      <Content
+        className={styles.content}
+        style={{ padding: 0, marginTop: "65px" }}
+      >
         {children}
       </Content>
     </Layout>
