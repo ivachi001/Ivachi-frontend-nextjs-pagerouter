@@ -23,11 +23,12 @@ import dayjs from "dayjs";
 
 interface Coupon {
   id: number;
-  code: string;
+  coupon_code: string;
   title: string;
   description: string;
   discount_type: string;
   discount_value: number;
+  usage_limit: number;
   applies_to: string;
   status: number;
   start_date?: string;
@@ -90,8 +91,8 @@ const ManageCouponsPage: AppPageProps = () => {
   const columns: ColumnsType<Coupon> = [
     {
       title: "Code",
-      dataIndex: "code",
-      key: "code",
+      dataIndex: "coupon_code",
+      key: "coupon_code",
     },
     {
       title: "Title",
@@ -109,9 +110,19 @@ const ManageCouponsPage: AppPageProps = () => {
       key: "discount_type",
     },
     {
+      title: "Usage Limit",
+      dataIndex: "usage_limit",
+      key: "usage_limit",
+    },
+    {
       title: "Discount Value",
       dataIndex: "discount_value",
       key: "discount_value",
+    },
+    {
+      title: "Min Order Value",
+      dataIndex: "min_order_value",
+      key: "min_order_value",
     },
     {
       title: "Status",
@@ -215,11 +226,16 @@ const ManageCouponsPage: AppPageProps = () => {
           requiredMark={false}
         >
           <Form.Item
-            name="code"
+            name="coupon_code"
             label="Coupon Code"
             rules={[required("Please input coupon code!"), maxLength(50)]}
           >
-            <Input placeholder="Coupon Code" />
+            <Input
+              placeholder="Coupon Code"
+              onInput={(e: any) => {
+                e.target.value = e.target.value.toUpperCase();
+              }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -256,6 +272,22 @@ const ManageCouponsPage: AppPageProps = () => {
           >
             <Input type="number" placeholder="Discount Value" />
           </Form.Item>
+          <Form.Item
+            name="min_order_value"
+            label="Min Order Value"
+            rules={[required("Please input min order value!")]}
+          >
+            <Input type="number" placeholder="Min Order Value" />
+          </Form.Item>
+
+          <Form.Item
+            name="usage_limit"
+            label="Usage Limit"
+            rules={[required("Please input usage limit!")]}
+          >
+            <Input type="number" placeholder="Usage Limit" />
+          </Form.Item>
+
 
           <Form.Item
             name="applies_to"
@@ -263,8 +295,11 @@ const ManageCouponsPage: AppPageProps = () => {
             rules={[required("Please select applies to!")]}
           >
             <Select placeholder="Select Applies To">
+            {/* PRODUCT_LIST
+            COMBO_LIST */}
               <Select.Option value="Product">Product</Select.Option>
-              <Select.Option value="Category">Category</Select.Option>
+              <Select.Option value="Combo">Combo</Select.Option>
+              <Select.Option value="Both">Both</Select.Option> {/*   Do not Applicable to */}
             </Select>
           </Form.Item>
 

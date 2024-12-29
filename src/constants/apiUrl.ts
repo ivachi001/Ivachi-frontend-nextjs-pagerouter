@@ -11,7 +11,8 @@ export const API_ENDPOINTS = {
   COUNTRY_LIST: `${BASE_URL}/common/country-list`, //Get list of countries   
   STATE_LIST: `${BASE_URL}/common/state-list`, //Get states list by country ID  
   CITY_LIST: `${BASE_URL}/common/city-list`, // Get list of cities by state ID
-
+  PRODUCT_LIST: `${BASE_URL}/common/product-list`, // Get list of cities by state ID
+  COMBO_LIST: `${BASE_URL}/common/combo-list`, // Get list of cities by state ID
 
   //Categories
   CATEGORY: `${BASE_URL}/category`,
