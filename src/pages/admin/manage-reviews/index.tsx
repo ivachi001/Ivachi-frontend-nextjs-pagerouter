@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Table, Button, Drawer, Space, Form, Input, Select } from "antd";
+import { Table, Button, Space, Input, Modal, Form } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import styles from "./manage-reviews.module.scss";
 import { AppPageProps } from "@/types";
@@ -10,6 +10,9 @@ import axiosHelper from "@/utils/axiosHelper";
 import { notify } from "@/utils/common";
 import { required, maxLength } from "@/utils/formValidation";
 import { debounce } from "lodash";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { REVIEW_STATUS } from "@/constants/appDefaults";
+
 
 interface Review {
   id: number;
@@ -24,16 +27,15 @@ interface Review {
 
 const ManageReviewsPage: AppPageProps = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [drawerVisible, setDrawerVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
-  const [reviewForm] = Form.useForm();
-  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [searchText, setSearchText] = useState("");
+
+  const { confirm } = Modal;
 
   const fetchReviews = async (page = 1, perPage = 10, search = "") => {
     try {
@@ -44,8 +46,8 @@ const ManageReviewsPage: AppPageProps = () => {
         search,
       });
 
-      if (response?.data) {
-        setReviews(response.data);
+      if (response?.list_data?.length > 0) {
+        setReviews(response.list_data);
         setPagination({
           current: response.page,
           pageSize: response.per_page,
@@ -90,14 +92,24 @@ const ManageReviewsPage: AppPageProps = () => {
 
   const columns: ColumnsType<Review> = [
     {
-      title: "Product ID",
-      dataIndex: "product_id",
-      key: "product_id",
+      title: 'Product',
+      dataIndex: ['product', 'title'], // Access nested key
+      key: 'title',
     },
     {
-      title: "User ID",
-      dataIndex: "user_id",
-      key: "user_id",
+      title: 'Customer Email',
+      dataIndex: ['customer', 'email'], // Access nested key
+      key: 'customer_email',
+    },
+    {
+      title: 'First Name',
+      dataIndex: ['customer', 'first_name'], // Access nested key
+      key: 'customer_first_name',
+    },
+    {
+      title: 'Last Name',
+      dataIndex: ['customer', 'last_name'], // Access nested key
+      key: 'customer_last_name',
     },
     {
       title: "Rating",
@@ -105,57 +117,81 @@ const ManageReviewsPage: AppPageProps = () => {
       key: "rating",
     },
     {
-      title: "Comment",
-      dataIndex: "comment",
-      key: "comment",
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => (status === 1 ? "Approved" : "Pending"),
+      render: (status) => {
+        switch (status) {
+          case 1:
+            return "Approved";
+          case 2:
+            return "Rejected";
+          default:
+            return "Pending";
+        }
+      },
     },
     {
       title: "Action",
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button
-            type="primary"
-            onClick={async () => {
-              const review = await fetchReviewById(record.id);
-              if (review) {
-                setSelectedReview(review);
-                reviewForm.setFieldsValue({
-                  status: review.status,
-                });
-                setDrawerVisible(true);
-              }
-            }}
-          >
-            Update Status
-          </Button>
+          {record.status === REVIEW_STATUS.PENDING && (
+            <>
+              <Button
+                type="primary"
+                onClick={() => showConfirm(record.id, "approve")}
+              >
+                Approve
+              </Button>
+              <Button
+                danger
+                onClick={() => showConfirm(record.id, "reject")}
+              >
+                Reject
+              </Button>
+            </>
+          )}
+          {record.status === REVIEW_STATUS.APPROVED && (
+            <Button
+              danger
+              onClick={() => showConfirm(record.id, "reject")}
+            >
+              Reject
+            </Button>
+          )}
+          {record.status === REVIEW_STATUS.REJECT && (
+            <Button
+              type="primary"
+              onClick={() => showConfirm(record.id, "approve")}
+            >
+              Approve
+            </Button>
+          )}
         </Space>
       ),
     },
   ];
 
-  const handleUpdateReview = async (values: any) => {
-    if (!selectedReview) return;
-
+  const handleStatusUpdate = async (reviewId: number, status: number) => {
     try {
       setLoading(true);
       const response = await axiosHelper.patch(
-        `${API_ENDPOINTS.REVIEW_UPDATE_STATUS}/${selectedReview.id}`,
+        `${API_ENDPOINTS.REVIEW_UPDATE_STATUS}/${reviewId}`,
         {
-          status: values.status,
+          status,
         }
       );
 
       if (response?.data) {
-        notify.success("Review status updated successfully!");
-        setDrawerVisible(false);
-        reviewForm.resetFields();
+        notify.success(
+          `Review ${status === 1 ? "approved" : "rejected"} successfully!`
+        );
         fetchReviews(pagination.current, pagination.pageSize, searchText);
       }
     } catch (error: any) {
@@ -165,8 +201,18 @@ const ManageReviewsPage: AppPageProps = () => {
     }
   };
 
-  const onFinish = (values: any) => {
-    handleUpdateReview(values);
+  const showConfirm = (reviewId: number, action: "approve" | "reject") => {
+    confirm({
+      title: `Are you sure you want to ${action} this review?`,
+      icon: <ExclamationCircleOutlined />,
+      content: `This action will ${action} the review and cannot be undone.`,
+      okText: "Yes",
+      okType: action === "approve" ? "primary" : "danger",
+      cancelText: "No",
+      onOk() {
+        handleStatusUpdate(reviewId, action === "approve" ? 1 : 2);
+      },
+    });
   };
 
   return (
@@ -197,39 +243,6 @@ const ManageReviewsPage: AppPageProps = () => {
           pageSizeOptions: ["10", "20", "50"],
         }}
       />
-
-      <Drawer
-        title="Update Review Status"
-        placement="right"
-        width={400}
-        onClose={() => setDrawerVisible(false)}
-        open={drawerVisible}
-        destroyOnClose={true}
-      >
-        <Form
-          form={reviewForm}
-          onFinish={onFinish}
-          layout="vertical"
-          requiredMark={false}
-        >
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[required("Please select status!")]}
-          >
-            <Select placeholder="Select Status">
-              <Select.Option value={1}>Approved</Select.Option>
-              <Select.Option value={0}>Pending</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
-              Update Status
-            </Button>
-          </Form.Item>
-        </Form>
-      </Drawer>
     </div>
   );
 };

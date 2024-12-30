@@ -20,6 +20,7 @@ import axiosHelper from "@/utils/axiosHelper";
 import { notify } from "@/utils/common";
 import { required, maxLength } from "@/utils/formValidation";
 import { debounce } from "lodash";
+import { INQUIRY_STATUSES } from "@/constants/appDefaults";
 
 interface Inquiry {
   id: number;
@@ -57,9 +58,11 @@ const ManageInquiriesPage: AppPageProps = () => {
         per_page: perPage,
         search,
       });
+      console.log("fetchInquiries", response);
+      
 
-      if (response?.data) {
-        setInquiries(response.data);
+      if (response?.list_data?.length > 0) {
+        setInquiries(response?.list_data);
         setPagination({
           current: response.page,
           pageSize: response.per_page,
@@ -125,9 +128,9 @@ const ManageInquiriesPage: AppPageProps = () => {
     },
     {
       title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (status === 1 ? "Resolved" : "Pending"),
+      dataIndex: "status_name",
+      key: "status_name",
+      // render: (status) => (status === INQUIRY_STATUSES.REPLIED ? "Resolved" : "Pending"),
     },
     {
       title: "Action",
@@ -137,14 +140,8 @@ const ManageInquiriesPage: AppPageProps = () => {
           <Button
             type="primary"
             onClick={async () => {
-              const inquiry = await fetchInquiryById(record.id);
-              if (inquiry) {
-                setSelectedInquiry(inquiry);
-                inquiryForm.setFieldsValue({
-                  reply_message: inquiry.reply_message || "",
-                });
-                setDrawerVisible(true);
-              }
+              setSelectedInquiry(record);
+              setDrawerVisible(true);
             }}
           >
             Reply

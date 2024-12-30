@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
   //Coupons
   COUPON: `${BASE_URL}/coupon`, // For listing all coupons
   CREATE_COUPON: `${BASE_URL}/coupon/create`,
+  UPDATE_COUPON_STATUS: `${BASE_URL}/coupon/update-status`,
 
   //Roles
   ROLE_ACTIONS: `${BASE_URL}/role`, // For listing all coupons

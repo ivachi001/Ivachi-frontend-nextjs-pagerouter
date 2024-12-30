@@ -10,6 +10,7 @@ import {
   Input,
   Select,
   DatePicker,
+  Switch,
 } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import styles from "./manage-coupons.module.scss";
@@ -29,6 +30,7 @@ interface Coupon {
   discount_type: string;
   discount_value: number;
   usage_limit: number;
+  min_order_value: number;
   applies_to: string;
   status: number;
   start_date?: string;
@@ -57,13 +59,14 @@ const ManageCouponsPage: AppPageProps = () => {
         per_page: perPage,
         search,
       });
+console.log('response', response);
 
-      if (response?.data?.list_data) {
-        setCoupons(response.data.list_data);
+      if (response?.list_data?.length > 0) {
+        setCoupons(response?.list_data);
         setPagination({
-          current: response.data.page,
-          pageSize: response.data.per_page,
-          total: response.data.total_records,
+          current: response?.page,
+          pageSize: response?.per_page,
+          total: response?.total_records,
         });
       }
     } catch (error: any) {
@@ -125,30 +128,29 @@ const ManageCouponsPage: AppPageProps = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => (status === 1 ? "Active" : "Inactive"),
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: () => (
-        <Space>
-          <Button type="primary" onClick={() => setDrawerVisible(true)}>
-            Create Coupon
-          </Button>
-        </Space>
+      render: (status: number, record: Coupon) => (
+        <Switch
+          checkedChildren="Active"
+          unCheckedChildren="Inactive"
+          checked={status === 1}
+          loading={loading}
+          onChange={(checked) => handleStatusChange(record.id, checked)}
+        />
       ),
-    },
+    }
   ];
 
   const handleCreateCoupon = async (values: any) => {
+    console.log("handleCreateCoupon", values);
+    
     try {
       setLoading(true);
       const formattedValues = {
         ...values,
-        applicable_to:
-          appliesTo === "Both"
-            ? []
-            : values.applicable_to.split(",").map(Number),
+        // applicable_to:
+        //   appliesTo === "Both"
+        //     ? []
+        //     : values?.applicable_to.split(",").map(Number),
         start_date: values.start_date
           ? dayjs(values.start_date).format("YYYY-MM-DD")
           : null,
@@ -201,6 +203,27 @@ const ManageCouponsPage: AppPageProps = () => {
       });
     } else {
       setApplicableOptions([]);
+    }
+  };
+
+  const handleStatusChange = async (couponId: number, status: boolean) => {
+    try {
+      setLoading(true);
+      const response = await axiosHelper.patch(
+        `${API_ENDPOINTS.UPDATE_COUPON_STATUS}/${couponId}`,
+        {
+          status,
+        }
+      );
+
+      if (response?.data) {
+        notify.success(response?.message);
+        fetchCoupons(pagination.current, pagination.pageSize, searchText);
+      }
+    } catch (error: any) {
+      notify.error(error?.message || "Failed to update status");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -304,6 +327,13 @@ const ManageCouponsPage: AppPageProps = () => {
             rules={[required("Please input usage limit!")]}
           >
             <Input type="number" placeholder="Usage Limit" />
+          </Form.Item>
+          <Form.Item
+            name="min_order_value"
+            label="Min Order Value"
+            rules={[required("Please input Min Order Value!")]}
+          >
+            <Input type="number" placeholder="Min Order Value" />
           </Form.Item>
 
           <Form.Item
