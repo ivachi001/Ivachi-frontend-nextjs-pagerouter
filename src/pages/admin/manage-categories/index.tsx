@@ -19,7 +19,7 @@ import { notify, onKeyDownAlphabetsAndNumbersOnly } from "@/utils/common";
 import { AppPageProps } from "@/types";
 import { API_ENDPOINTS } from "@/constants/apiUrl";
 import axiosHelper from "@/utils/axiosHelper";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -33,43 +33,40 @@ interface Category {
   status: number;
 }
 
-
-
 const ManageCategoriesPage: AppPageProps = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
+
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ 
-    current: 1, 
+  const [pagination, setPagination] = useState({
+    current: 1,
     pageSize: 10,
-    total: 0 
+    total: 0,
   });
   const [addCategoryForm] = Form.useForm();
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
 
-  const fetchCategories = async (page = 1, perPage = 10, search = '') => {
+  const fetchCategories = async (page = 1, perPage = 10, search = "") => {
     try {
       setLoading(true);
-      const response:any = await axiosHelper.get(
-        API_ENDPOINTS.CATEGORY,
-        {
-          page,
-          per_page: perPage,
-          search
-        }
-      );      
+      const response: any = await axiosHelper.get(API_ENDPOINTS.CATEGORY, {
+        page,
+        per_page: perPage,
+        search,
+      });
       if (response?.list_data) {
         setCategories(response.list_data);
         setPagination({
           current: response.page,
           pageSize: response.per_page,
-          total: response.total_records
+          total: response.total_records,
         });
       }
     } catch (error: any) {
-      notify.error(error?.message || 'Failed to fetch categories');
+      notify.error(error?.message || "Failed to fetch categories");
     } finally {
       setLoading(false);
     }
@@ -140,24 +137,24 @@ const ManageCategoriesPage: AppPageProps = () => {
     addCategoryForm.setFieldsValue({
       title: category.title,
       description: category.description,
-      status: category.status === 1
+      status: category.status === 1,
     });
     setDrawerVisible(true);
   };
 
   const handleTableChange = (newPagination: TablePaginationConfig) => {
-    fetchCategories(
-      newPagination.current || 1,
-      newPagination.pageSize || 10
-    );
+    fetchCategories(newPagination.current || 1, newPagination.pageSize || 10);
   };
 
-  const handleAddCategory = async (values: { title: string; description: string }) => {
+  const handleAddCategory = async (values: {
+    title: string;
+    description: string;
+  }) => {
     try {
       setLoading(true);
       const response = await axiosHelper.post(API_ENDPOINTS.CREATE_CATEGORY, {
         title: values.title,
-        description: values.description
+        description: values.description,
       });
 
       if (response?.data) {
@@ -167,7 +164,7 @@ const ManageCategoriesPage: AppPageProps = () => {
         fetchCategories(); // Refresh the list
       }
     } catch (error: any) {
-      notify.error(error?.message || 'Failed to add category');
+      notify.error(error?.message || "Failed to add category");
     } finally {
       setLoading(false);
     }
@@ -186,24 +183,25 @@ const ManageCategoriesPage: AppPageProps = () => {
   };
 
   const debouncedSearch = useMemo(
-    () => debounce((value: string) => {
-      setSearchText(value);
-      setPagination(prev => ({
-        ...prev,
-        current: 1
-      }));
-      fetchCategories(1, pagination.pageSize, value);
-    }, 500),
+    () =>
+      debounce((value: string) => {
+        setSearchText(value);
+        setPagination((prev) => ({
+          ...prev,
+          current: 1,
+        }));
+        fetchCategories(1, pagination.pageSize, value);
+      }, 500),
     [pagination.pageSize]
   );
 
-  const handleUpdateCategory = async (values: { 
-    title: string; 
+  const handleUpdateCategory = async (values: {
+    title: string;
     description: string;
     status: boolean;
   }) => {
     if (!selectedCategory) return;
-    
+
     try {
       setLoading(true);
       const response = await axiosHelper.put(
@@ -211,9 +209,9 @@ const ManageCategoriesPage: AppPageProps = () => {
         {
           title: values.title,
           description: values.description,
-          status: values.status // This will be true/false from Switch
+          status: values.status, // This will be true/false from Switch
         }
-      );      
+      );
       if (response?.data) {
         notify.success(response?.message);
         setDrawerVisible(false);
@@ -221,7 +219,7 @@ const ManageCategoriesPage: AppPageProps = () => {
         fetchCategories(pagination.current, pagination.pageSize, searchText);
       }
     } catch (error: any) {
-      notify.error(error?.message || 'Failed to update category');
+      notify.error(error?.message || "Failed to update category");
     } finally {
       setLoading(false);
     }
@@ -229,12 +227,12 @@ const ManageCategoriesPage: AppPageProps = () => {
 
   const handleDeleteCategory = (category: Category) => {
     confirm({
-      title: 'Are you sure you want to delete this category?',
+      title: "Are you sure you want to delete this category?",
       icon: <ExclamationCircleOutlined />,
-      content: 'This action cannot be undone.',
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
       onOk: async () => {
         try {
           setLoading(true);
@@ -244,10 +242,14 @@ const ManageCategoriesPage: AppPageProps = () => {
 
           if (response?.data) {
             notify.success(response?.message);
-            fetchCategories(pagination.current, pagination.pageSize, searchText);
+            fetchCategories(
+              pagination.current,
+              pagination.pageSize,
+              searchText
+            );
           }
         } catch (error: any) {
-          notify.error(error?.message || 'Failed to delete category');
+          notify.error(error?.message || "Failed to delete category");
         } finally {
           setLoading(false);
         }
@@ -261,7 +263,7 @@ const ManageCategoriesPage: AppPageProps = () => {
       const response = await axiosHelper.patch(
         `${API_ENDPOINTS.UPDATE_CATEGORY_STATUS}/${categoryId}`,
         {
-          status
+          status,
         }
       );
 
@@ -270,21 +272,21 @@ const ManageCategoriesPage: AppPageProps = () => {
         fetchCategories(pagination.current, pagination.pageSize, searchText);
       }
     } catch (error: any) {
-      notify.error(error?.message || 'Failed to update status');
+      notify.error(error?.message || "Failed to update status");
     } finally {
       setLoading(false);
     }
   };
 
-  const onFinish = (values: { 
-    title: string; 
+  const onFinish = (values: {
+    title: string;
     description: string;
     status?: boolean;
   }) => {
     if (selectedCategory) {
       handleUpdateCategory({
         ...values,
-        status: values.status ?? selectedCategory.status === 1
+        status: values.status ?? selectedCategory.status === 1,
       });
     } else {
       handleAddCategory(values);
@@ -385,8 +387,14 @@ const ManageCategoriesPage: AppPageProps = () => {
             </Form.Item>
           )}
           <Form.Item>
-            <Button type="primary" htmlType="submit" size="large" block loading={loading}>
-              {selectedCategory ? 'Update Category' : 'Add Category'}
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              block
+              loading={loading}
+            >
+              {selectedCategory ? "Update Category" : "Add Category"}
             </Button>
           </Form.Item>
         </Form>

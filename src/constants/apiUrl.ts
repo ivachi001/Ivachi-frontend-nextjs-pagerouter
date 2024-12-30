@@ -43,12 +43,20 @@ export const API_ENDPOINTS = {
   //Products
   PRODUCT_ACTIONS: `${BASE_URL}/product`,
   PRODUCT_UPDATE: `${BASE_URL}/product/update`,
-  PRODUCT_UPDATE_STATUS: `${BASE_URL}/product/update-status`
+  PRODUCT_UPDATE_STATUS: `${BASE_URL}/product/update-status`,
 
-  // /api/v1/product  Get list of products 
-  // /api/v1/product  Create a new product
-  // /api/v1/product/{id}  Get product by ID
-  // /api/v1/product/{id}  Delete a product
-  // /api/v1/product/update  Update a product
-  // /api/v1/product/update-status/{id}
+  //Inquiry
+  INQUIRY_CREATE: `${BASE_URL}/inquiry/create`,
+  INQUIRY_GET: `${BASE_URL}/inquiry`,
+  INQUIRY_MARK_AS_RESOLVED: `${BASE_URL}/inquiry/mark-as-resolved`,
+  INQUIRY_REPLY: `${BASE_URL}/inquiry/reply`,
+
+  //Reviews
+  REVIEW_GET: `${BASE_URL}/review`,
+  REVIEW_CREATE: `${BASE_URL}/review/create`,
+  REVIEW_UPDATE_STATUS: `${BASE_URL}/review/update-status`,
+
+  // GET /api/v1/review Get list of product reviews
+  // POST /api/v1/review/create Create a new product review
+  // PATCH /api/v1/review/update-status/{id}
 };

@@ -179,6 +179,16 @@ const ManageCouponsPage: AppPageProps = () => {
     handleCreateCoupon(values);
   };
 
+  const handleAppliesToChange = async (value: string) => {
+    if (value === "Product") {
+      const response = await axiosHelper.get(API_ENDPOINTS.PRODUCT_LIST);
+      console.log(response);
+    } else if (value === "Combo") {
+      const response = await axiosHelper.get(API_ENDPOINTS.COMBO_LIST);
+      console.log(response);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -261,7 +271,7 @@ const ManageCouponsPage: AppPageProps = () => {
           >
             <Select placeholder="Select Discount Type">
               <Select.Option value="Percentage">Percentage</Select.Option>
-              <Select.Option value="Fixed">Fixed Amount</Select.Option>
+              <Select.Option value="Flat">Flat</Select.Option>
             </Select>
           </Form.Item>
 
@@ -288,18 +298,21 @@ const ManageCouponsPage: AppPageProps = () => {
             <Input type="number" placeholder="Usage Limit" />
           </Form.Item>
 
-
           <Form.Item
             name="applies_to"
             label="Applies To"
             rules={[required("Please select applies to!")]}
           >
-            <Select placeholder="Select Applies To">
-            {/* PRODUCT_LIST
+            <Select
+              placeholder="Select Applies To"
+              onChange={handleAppliesToChange}
+            >
+              {/* PRODUCT_LIST
             COMBO_LIST */}
               <Select.Option value="Product">Product</Select.Option>
               <Select.Option value="Combo">Combo</Select.Option>
-              <Select.Option value="Both">Both</Select.Option> {/*   Do not Applicable to */}
+              <Select.Option value="Both">Both</Select.Option>{" "}
+              {/*   Do not Applicable to */}
             </Select>
           </Form.Item>
 

@@ -4,7 +4,13 @@ export const appRoutes: any = {
     "/admin/dashboard": [
         hierarchyWiseRoles.ADMIN
     ],
+    "/admin/manage-inquiries": [
+        hierarchyWiseRoles.ADMIN
+    ],
     "/admin/manage-categories": [
+        hierarchyWiseRoles.ADMIN
+    ],
+    "/admin/manage-reviews": [
         hierarchyWiseRoles.ADMIN
     ],
     "/admin/manage-products": [

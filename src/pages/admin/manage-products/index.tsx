@@ -50,7 +50,7 @@ const mockProducts: Product[] = Array.from({ length: 50 }, (_, index) => ({
   benefits: "Benefit description",
   howToUse: "Instructions on how to use",
   keyIngredients: "Ingredient list",
-  status: index  % 2 === 0 ? "active" : "inactive",
+  status: index % 2 === 0 ? "active" : "inactive",
   imageUrl: `https://picsum.photos/200/300?random=${index + 1}`,
 }));
 

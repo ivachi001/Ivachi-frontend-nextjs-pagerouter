@@ -8,6 +8,8 @@ import {
   DashboardOutlined,
   SettingOutlined,
   LoginOutlined,
+  MessageOutlined,
+  StarOutlined,
 } from "@ant-design/icons";
 import styles from "./admin.module.scss";
 import dynamic from "next/dynamic";
@@ -54,6 +56,18 @@ export default function AdminLayout({
       onClick: () => router.push("/admin/manage-categories"),
     },
     {
+      key: "reviews",
+      icon: <StarOutlined />,
+      label: "Reviews",
+      onClick: () => router.push("/admin/manage-reviews"),
+    },
+    {
+      key: "inquiries",
+      icon: <MessageOutlined />,
+      label: "Inquiries",
+      onClick: () => router.push("/admin/manage-inquiries"),
+    },
+    {
       key: "products",
       icon: <ShoppingOutlined />,
       label: "Products",
@@ -84,7 +98,7 @@ export default function AdminLayout({
           <Sider
             width={200}
             className={styles.sider}
-            style={{ background: appTheme.primaryColor, marginTop: '65px' }}
+            style={{ background: appTheme.primaryColor, marginTop: "65px" }}
           >
             <Menu
               mode="inline"
