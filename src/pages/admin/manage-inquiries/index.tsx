@@ -11,6 +11,7 @@ import {
   Select,
   message,
   Modal,
+  Image,
 } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import styles from "./manage-inquiries.module.scss";
@@ -37,6 +38,12 @@ interface Inquiry {
   };
 }
 
+interface DetailedInquiry extends Inquiry {
+  attachment_path?: string;
+  reply_message?: string;
+  status_name: string;
+}
+
 const ManageInquiriesPage: AppPageProps = () => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -47,8 +54,11 @@ const ManageInquiriesPage: AppPageProps = () => {
     total: 0,
   });
   const [inquiryForm] = Form.useForm();
-  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
+  console.log("selectedInquiry", selectedInquiry);
+
   const [searchText, setSearchText] = useState("");
+  const [viewDrawerVisible, setViewDrawerVisible] = useState(false);
 
   const fetchInquiries = async (page = 1, perPage = 10, search = "") => {
     try {
@@ -59,7 +69,7 @@ const ManageInquiriesPage: AppPageProps = () => {
         search,
       });
       console.log("fetchInquiries", response);
-      
+
 
       if (response?.list_data?.length > 0) {
         setInquiries(response?.list_data);
@@ -81,7 +91,7 @@ const ManageInquiriesPage: AppPageProps = () => {
       const response: any = await axiosHelper.get(
         `${API_ENDPOINTS.INQUIRY_GET}/${id}`
       );
-      return response.data;
+      return response;
     } catch (error: any) {
       notify.error(error?.message || "Failed to fetch inquiry details");
       return null;
@@ -138,30 +148,47 @@ const ManageInquiriesPage: AppPageProps = () => {
       render: (_, record) => (
         <Space>
           <Button
-            type="primary"
-            onClick={async () => {
-              setSelectedInquiry(record);
-              setDrawerVisible(true);
-            }}
-          >
-            Reply
-          </Button>
-          <Button
             type="default"
             onClick={async () => {
-              await axiosHelper.patch(
-                `${API_ENDPOINTS.INQUIRY_MARK_AS_RESOLVED}/${record.id}`
-              );
-              notify.success("Inquiry marked as resolved!");
-              fetchInquiries(
-                pagination.current,
-                pagination.pageSize,
-                searchText
-              );
+              const inquiry = await fetchInquiryById(record.id);
+              setSelectedInquiry(inquiry);
+              setViewDrawerVisible(true);
             }}
           >
-            Mark as Resolved
+            View
           </Button>
+          {(record?.status === INQUIRY_STATUSES.PENDING) && (
+            <Button
+              type="primary"
+              onClick={async () => {
+                setSelectedInquiry(record);
+                setDrawerVisible(true);
+              }}
+            >
+              Reply
+            </Button>
+          )}
+          {
+            (record?.status === INQUIRY_STATUSES.PENDING || record?.status === INQUIRY_STATUSES.REPLIED) && (
+              <Button
+                type="default"
+                onClick={async () => {
+                  await axiosHelper.patch(
+                    `${API_ENDPOINTS.INQUIRY_MARK_AS_RESOLVED}/${record.id}`
+                  );
+                  notify.success("Inquiry marked as resolved!");
+                  fetchInquiries(
+                    pagination.current,
+                    pagination.pageSize,
+                    searchText
+                  );
+                }}
+              >
+                Mark as Resolved
+              </Button>
+
+            )
+          }
         </Space>
       ),
     },
@@ -173,7 +200,7 @@ const ManageInquiriesPage: AppPageProps = () => {
     try {
       setLoading(true);
       const response = await axiosHelper.patch(
-        `${API_ENDPOINTS.INQUIRY_REPLY}/${selectedInquiry.id}`,
+        `${API_ENDPOINTS.INQUIRY_REPLY}/${selectedInquiry?.id}`,
         {
           reply_message: values.reply_message,
         }
@@ -256,6 +283,64 @@ const ManageInquiriesPage: AppPageProps = () => {
             </Button>
           </Form.Item>
         </Form>
+      </Drawer>
+
+      <Drawer
+        title="View Inquiry Details"
+        placement="right"
+        width={500}
+        onClose={() => setViewDrawerVisible(false)}
+        open={viewDrawerVisible}
+        destroyOnClose={true}
+      >
+        {selectedInquiry && (
+          <div className={styles.inquiryDetails}>
+            <div className={styles.detailItem}>
+              <strong>Request Type:</strong>
+              <span>{selectedInquiry?.request_type?.title}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Full Name:</strong>
+              <span>{selectedInquiry?.full_name}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Email:</strong>
+              <span>{selectedInquiry?.email}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Phone Number:</strong>
+              <span>{selectedInquiry?.phone_no}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Message:</strong>
+              <span>{selectedInquiry?.message}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Status:</strong>
+              <span>{selectedInquiry?.status_name}</span>
+            </div>
+            {selectedInquiry?.reply_message && (
+              <div className={styles.detailItem}>
+                <strong>Reply Message:</strong>
+                <span>{selectedInquiry?.reply_message}</span>
+              </div>
+            )}
+            {selectedInquiry?.attachment_path && (
+              <div className={styles.detailItem}>
+                <strong>Attachment:</strong>
+                <Image
+                  src={selectedInquiry?.attachment_path}
+                  alt="Inquiry attachment"
+                  style={{ maxWidth: '100%', marginTop: 8 }}
+                />
+              </div>
+            )}
+            <div className={styles.detailItem}>
+              <strong>Created At:</strong>
+              <span>{selectedInquiry?.created_at}</span>
+            </div>
+          </div>
+        )}
       </Drawer>
     </div>
   );

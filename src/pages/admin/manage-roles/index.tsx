@@ -15,6 +15,7 @@ interface Role {
   id: number;
   name: string;
   permission_ids: number[];
+  permissions?: Array<{ id: number; name: string }>;
 }
 
 const ManageRolesPage: AppPageProps = () => {
@@ -29,6 +30,8 @@ const ManageRolesPage: AppPageProps = () => {
   const [roleForm] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [permissions, setPermissions] = useState<any[]>([]); // To hold permissions list
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const fetchRoles = async (page = 1, perPage = 10, search = "") => {
     try {
@@ -39,12 +42,12 @@ const ManageRolesPage: AppPageProps = () => {
         search,
       });
 
-      if (response?.data?.list_data) {
-        setRoles(response.data.list_data);
+      if (response?.list_data?.length > 0) {
+        setRoles(response.list_data);
         setPagination({
-          current: response.data.page,
-          pageSize: response.data.per_page,
-          total: response.data.total_records,
+          current: response.page,
+          pageSize: response.per_page,
+          total: response.total_records,
         });
       }
     } catch (error: any) {
@@ -92,19 +95,41 @@ const ManageRolesPage: AppPageProps = () => {
       key: "name",
     },
     {
+      title: "Permissions",
+      key: "permissions",
+      render: (_, record) => (
+        <span>
+          {record.permissions?.map(p => p.name).join(", ")}
+        </span>
+      )
+    },
+    {
       title: "Actions",
       key: "action",
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="primary" onClick={() => setDrawerVisible(true)}>
-            Create Role
+          <Button 
+            type="primary" 
+            onClick={() => handleEdit(record)}
+          >
+            Edit
           </Button>
         </Space>
       ),
     },
   ];
 
-  const handleCreateRole = async (values: any) => {
+  const handleEdit = (role: Role) => {
+    setSelectedRole(role);
+    setIsEditing(true);
+    roleForm.setFieldsValue({
+      name: role.name,
+      permission_ids: role.permissions?.map(p => p.id) || [],
+    });
+    setDrawerVisible(true);
+  };
+
+  const handleRoleSubmit = async (values: any) => {
     try {
       setLoading(true);
       const formattedValues = {
@@ -112,26 +137,43 @@ const ManageRolesPage: AppPageProps = () => {
         permission_ids: values.permission_ids,
       };
 
-      const response = await axiosHelper.post(
-        API_ENDPOINTS.ROLE_ACTIONS,
-        formattedValues
-      );
+      let response;
+      if (isEditing && selectedRole) {
+        response = await axiosHelper.put(
+          `${API_ENDPOINTS.ROLE_UPDATE}/${selectedRole.id}`,
+          formattedValues
+        );
+      } else {
+        response = await axiosHelper.post(
+          API_ENDPOINTS.ROLE_ACTIONS,
+          formattedValues
+        );
+      }
 
       if (response?.data) {
-        notify.success("Role created successfully!");
+        notify.success(`Role ${isEditing ? 'updated' : 'created'} successfully!`);
         setDrawerVisible(false);
         roleForm.resetFields();
+        setSelectedRole(null);
+        setIsEditing(false);
         fetchRoles(pagination.current, pagination.pageSize, searchText);
       }
     } catch (error: any) {
-      notify.error(error?.message || "Failed to create role");
+      notify.error(error?.message || `Failed to ${isEditing ? 'update' : 'create'} role`);
     } finally {
       setLoading(false);
     }
   };
 
   const onFinish = (values: any) => {
-    handleCreateRole(values);
+    handleRoleSubmit(values);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerVisible(false);
+    setSelectedRole(null);
+    setIsEditing(false);
+    roleForm.resetFields();
   };
 
   return (
@@ -167,10 +209,10 @@ const ManageRolesPage: AppPageProps = () => {
       />
 
       <Drawer
-        title="Create Role"
+        title={isEditing ? "Edit Role" : "Create Role"}
         placement="right"
         width={400}
-        onClose={() => setDrawerVisible(false)}
+        onClose={handleDrawerClose}
         open={drawerVisible}
         destroyOnClose={true}
       >
@@ -205,7 +247,7 @@ const ManageRolesPage: AppPageProps = () => {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block>
-              Create Role
+              {isEditing ? "Update Role" : "Create Role"}
             </Button>
           </Form.Item>
         </Form>

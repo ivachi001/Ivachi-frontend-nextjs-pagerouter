@@ -39,7 +39,7 @@ export const API_ENDPOINTS = {
 
   //Roles
   ROLE_ACTIONS: `${BASE_URL}/role`, // For listing all coupons
-  ROLE_UPDATE: `${BASE_URL}/update`,
+  ROLE_UPDATE: `${BASE_URL}/role/update`,
 
   //Products
   PRODUCT_ACTIONS: `${BASE_URL}/product`,

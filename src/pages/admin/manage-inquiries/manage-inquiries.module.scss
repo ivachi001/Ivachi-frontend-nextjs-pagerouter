@@ -16,3 +16,19 @@
 .tableActions {
   margin-bottom: 16px;
 }
+
+.inquiryDetails {
+  .detailItem {
+    margin-bottom: 16px;
+    
+    strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #666;
+    }
+    
+    span {
+      font-size: 16px;
+    }
+  }
+}
