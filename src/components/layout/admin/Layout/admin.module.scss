@@ -1,0 +1,26 @@
+.adminContainer {
+  width: 100%; /* Make the container full width */
+  min-height: 100vh; /* Ensure it takes at least the full height of the viewport */
+  padding: 0; /* Remove any padding if necessary */
+  margin: 0; /* Remove any margin if necessary */
+  background-color: #f5f5f5; /* Optional: Set a background color */
+}
+
+.adminLayout {
+  width: 100%; /* Ensure the layout takes full width */
+  min-height: 100vh; /* Ensure it takes at least the full height of the viewport */
+  margin: 0; /* Remove any margin */
+}
+
+.sider {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.content {
+  background: #fff;
+  margin: 0; /* Remove margin to take full width */
+  padding: 24px; /* Optional: Add padding for content */
+  min-height: 280px;
+  border-radius: 4px;
+}

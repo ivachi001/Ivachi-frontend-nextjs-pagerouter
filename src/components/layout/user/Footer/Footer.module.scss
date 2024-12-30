@@ -1,0 +1,47 @@
+.footer {
+    background: #001529 !important;
+    color: #fff;
+    padding: 48px 24px 24px;
+  
+    :global {
+      .ant-typography {
+        color: #fff;
+      }
+    }
+  
+    .linkList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+  
+      li {
+        margin-bottom: 8px;
+      }
+  
+      a {
+        color: rgba(255, 255, 255, 0.8);
+        &:hover {
+          color: #fff;
+        }
+      }
+    }
+  
+    .socialLinks {
+      font-size: 24px;
+  
+      a {
+        color: rgba(255, 255, 255, 0.8);
+        &:hover {
+          color: #fff;
+        }
+      }
+    }
+  
+    .copyright {
+      margin-top: 48px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 24px;
+    }
+  }
+  
