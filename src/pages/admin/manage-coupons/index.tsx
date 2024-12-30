@@ -46,6 +46,8 @@ const ManageCouponsPage: AppPageProps = () => {
   });
   const [couponForm] = Form.useForm();
   const [searchText, setSearchText] = useState("");
+  const [applicableOptions, setApplicableOptions] = useState<any[]>([]);
+  const [appliesTo, setAppliesTo] = useState<string>("");
 
   const fetchCoupons = async (page = 1, perPage = 10, search = "") => {
     try {
@@ -120,11 +122,6 @@ const ManageCouponsPage: AppPageProps = () => {
       key: "discount_value",
     },
     {
-      title: "Min Order Value",
-      dataIndex: "min_order_value",
-      key: "min_order_value",
-    },
-    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -148,7 +145,10 @@ const ManageCouponsPage: AppPageProps = () => {
       setLoading(true);
       const formattedValues = {
         ...values,
-        applicable_to: values.applicable_to.split(",").map(Number),
+        applicable_to:
+          appliesTo === "Both"
+            ? []
+            : values.applicable_to.split(",").map(Number),
         start_date: values.start_date
           ? dayjs(values.start_date).format("YYYY-MM-DD")
           : null,
@@ -179,13 +179,28 @@ const ManageCouponsPage: AppPageProps = () => {
     handleCreateCoupon(values);
   };
 
-  const handleAppliesToChange = async (value: string) => {
+  const handleAppliesToChange = (value: string) => {
+    setAppliesTo(value);
     if (value === "Product") {
-      const response = await axiosHelper.get(API_ENDPOINTS.PRODUCT_LIST);
-      console.log(response);
+      axiosHelper.get(API_ENDPOINTS.PRODUCT_LIST).then((response) => {
+        setApplicableOptions(
+          response?.map((product: any) => ({
+            label: product.title,
+            value: product.id,
+          }))
+        );
+      });
     } else if (value === "Combo") {
-      const response = await axiosHelper.get(API_ENDPOINTS.COMBO_LIST);
-      console.log(response);
+      axiosHelper.get(API_ENDPOINTS.COMBO_LIST).then((response) => {
+        setApplicableOptions(
+          response?.map((combo: any) => ({
+            label: combo.title,
+            value: combo.id,
+          }))
+        );
+      });
+    } else {
+      setApplicableOptions([]);
     }
   };
 
@@ -282,13 +297,6 @@ const ManageCouponsPage: AppPageProps = () => {
           >
             <Input type="number" placeholder="Discount Value" />
           </Form.Item>
-          <Form.Item
-            name="min_order_value"
-            label="Min Order Value"
-            rules={[required("Please input min order value!")]}
-          >
-            <Input type="number" placeholder="Min Order Value" />
-          </Form.Item>
 
           <Form.Item
             name="usage_limit"
@@ -307,22 +315,25 @@ const ManageCouponsPage: AppPageProps = () => {
               placeholder="Select Applies To"
               onChange={handleAppliesToChange}
             >
-              {/* PRODUCT_LIST
-            COMBO_LIST */}
               <Select.Option value="Product">Product</Select.Option>
               <Select.Option value="Combo">Combo</Select.Option>
-              <Select.Option value="Both">Both</Select.Option>{" "}
-              {/*   Do not Applicable to */}
+              <Select.Option value="Both">Both</Select.Option>
             </Select>
           </Form.Item>
 
-          <Form.Item
-            name="applicable_to"
-            label="Applicable To (IDs)"
-            rules={[required("Please input applicable IDs!")]}
-          >
-            <Input placeholder="Comma separated IDs" />
-          </Form.Item>
+          {appliesTo !== "Both" && (
+            <Form.Item
+              name="applicable_to"
+              label="Applicable To (IDs)"
+              rules={[required("Please input applicable IDs!")]}
+            >
+              <Select
+                mode="multiple"
+                placeholder="Select Applicable IDs"
+                options={applicableOptions}
+              />
+            </Form.Item>
+          )}
 
           <Form.Item
             name="start_date"

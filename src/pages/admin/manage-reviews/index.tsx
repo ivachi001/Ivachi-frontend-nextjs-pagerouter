@@ -173,9 +173,6 @@ const ManageReviewsPage: AppPageProps = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Manage Reviews</h1>
-        <Button type="primary" onClick={() => setDrawerVisible(true)}>
-          Add New Review
-        </Button>
       </div>
 
       <div className={styles.tableActions}>
