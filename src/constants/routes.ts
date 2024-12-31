@@ -1,6 +1,9 @@
 import { hierarchyWiseRoles } from "./appDefaults";
 
 export const appRoutes: any = {
+    "/users": [
+        hierarchyWiseRoles.ADMIN
+    ],
     "/admin/dashboard": [
         hierarchyWiseRoles.ADMIN
     ],
