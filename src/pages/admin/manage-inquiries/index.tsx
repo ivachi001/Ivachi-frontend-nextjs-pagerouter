@@ -70,7 +70,6 @@ const ManageInquiriesPage: AppPageProps = () => {
       });
       console.log("fetchInquiries", response);
 
-
       if (response?.list_data?.length > 0) {
         setInquiries(response?.list_data);
         setPagination({
@@ -157,7 +156,7 @@ const ManageInquiriesPage: AppPageProps = () => {
           >
             View
           </Button>
-          {(record?.status === INQUIRY_STATUSES.PENDING) && (
+          {record?.status === INQUIRY_STATUSES.PENDING && (
             <Button
               type="primary"
               onClick={async () => {
@@ -168,27 +167,25 @@ const ManageInquiriesPage: AppPageProps = () => {
               Reply
             </Button>
           )}
-          {
-            (record?.status === INQUIRY_STATUSES.PENDING || record?.status === INQUIRY_STATUSES.REPLIED) && (
-              <Button
-                type="default"
-                onClick={async () => {
-                  await axiosHelper.patch(
-                    `${API_ENDPOINTS.INQUIRY_MARK_AS_RESOLVED}/${record.id}`
-                  );
-                  notify.success("Inquiry marked as resolved!");
-                  fetchInquiries(
-                    pagination.current,
-                    pagination.pageSize,
-                    searchText
-                  );
-                }}
-              >
-                Mark as Resolved
-              </Button>
-
-            )
-          }
+          {(record?.status === INQUIRY_STATUSES.PENDING ||
+            record?.status === INQUIRY_STATUSES.REPLIED) && (
+            <Button
+              type="default"
+              onClick={async () => {
+                await axiosHelper.patch(
+                  `${API_ENDPOINTS.INQUIRY_MARK_AS_RESOLVED}/${record.id}`
+                );
+                notify.success("Inquiry marked as resolved!");
+                fetchInquiries(
+                  pagination.current,
+                  pagination.pageSize,
+                  searchText
+                );
+              }}
+            >
+              Mark as Resolved
+            </Button>
+          )}
         </Space>
       ),
     },
@@ -331,7 +328,7 @@ const ManageInquiriesPage: AppPageProps = () => {
                 <Image
                   src={selectedInquiry?.attachment_path}
                   alt="Inquiry attachment"
-                  style={{ maxWidth: '100%', marginTop: 8 }}
+                  style={{ maxWidth: "100%", marginTop: 8 }}
                 />
               </div>
             )}

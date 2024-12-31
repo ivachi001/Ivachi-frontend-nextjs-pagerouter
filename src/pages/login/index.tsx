@@ -10,6 +10,7 @@ import { notify } from "@/utils/common";
 import axiosHelper from "@/utils/axiosHelper";
 import Cookies from "js-cookie";
 import { API_ENDPOINTS } from "@/constants/apiUrl";
+import { GetServerSideProps } from "next";
 
 const { Title, Text } = Typography;
 
@@ -31,11 +32,15 @@ interface LoginResponse {
   permissions: string[];
 }
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  show2FA: boolean;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ show2FA: initialShow2FA }) => {
   const [form] = Form.useForm();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [show2FA, setShow2FA] = useState(false);
+  const [show2FA, setShow2FA] = useState(initialShow2FA);
   const [loginOtp, setLoginOtp] = useState("");
 
   const handleLogin = async (values: LoginFormData) => {
@@ -47,13 +52,12 @@ const LoginPage: React.FC = () => {
       );
 
       // Store the token
-      Cookies.set('authToken', response.token);
-      
+      Cookies.set("authToken", response.token);
+
       notify.success("Login successful");
       router.push("/admin/dashboard");
     } catch (error) {
-      // Error is already handled by apiErrors function
-      console.error("Login error:", error);
+      notify.error("Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -67,22 +71,11 @@ const LoginPage: React.FC = () => {
 
     try {
       setLoading(true);
-      // Simulating API call for demo
       await new Promise((resolve) => setTimeout(resolve, 1000));
       notify.success("Login successful");
       router.push("/dashboard");
-
-      // Uncomment below for actual API integration
-      // const response = await authService.verifyOTP(loginOtp);
-      // if (response.success) {
-      //   notify.success("Login successful");
-      //   router.push("/dashboard");
-      // } else {
-      //   notify.error("Invalid OTP. Please try again.");
-      // }
     } catch (error) {
       notify.error("OTP verification failed. Please try again.");
-      console.error("OTP verification error:", error);
     } finally {
       setLoading(false);
     }
@@ -209,6 +202,40 @@ const LoginPage: React.FC = () => {
       </Card>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    const { req, res } = context;
+
+    // Example: Check for an existing authentication token
+    const authToken = req.cookies?.authToken;
+
+    if (authToken) {
+      // Optionally, verify the token with an API call
+      const isValid = true; // Replace with your token verification logic
+      if (isValid) {
+        // Redirect to the dashboard if already authenticated
+        res.writeHead(302, { Location: "/admin/dashboard" });
+        res.end();
+        return { props: {} };
+      }
+    }
+
+    // Perform any additional server-side logic or data fetching
+    return {
+      props: {
+        show2FA: false, // Example: Default value for 2FA
+      },
+    };
+  } catch (error) {
+    console.error("Error in getServerSideProps:", error);
+    return {
+      props: {
+        show2FA: false,
+      },
+    };
+  }
 };
 
 export default LoginPage;

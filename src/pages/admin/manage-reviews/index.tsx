@@ -13,7 +13,6 @@ import { debounce } from "lodash";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { REVIEW_STATUS } from "@/constants/appDefaults";
 
-
 interface Review {
   id: number;
   product_id: number;
@@ -92,24 +91,24 @@ const ManageReviewsPage: AppPageProps = () => {
 
   const columns: ColumnsType<Review> = [
     {
-      title: 'Product',
-      dataIndex: ['product', 'title'], // Access nested key
-      key: 'title',
+      title: "Product",
+      dataIndex: ["product", "title"], // Access nested key
+      key: "title",
     },
     {
-      title: 'Customer Email',
-      dataIndex: ['customer', 'email'], // Access nested key
-      key: 'customer_email',
+      title: "Customer Email",
+      dataIndex: ["customer", "email"], // Access nested key
+      key: "customer_email",
     },
     {
-      title: 'First Name',
-      dataIndex: ['customer', 'first_name'], // Access nested key
-      key: 'customer_first_name',
+      title: "First Name",
+      dataIndex: ["customer", "first_name"], // Access nested key
+      key: "customer_first_name",
     },
     {
-      title: 'Last Name',
-      dataIndex: ['customer', 'last_name'], // Access nested key
-      key: 'customer_last_name',
+      title: "Last Name",
+      dataIndex: ["customer", "last_name"], // Access nested key
+      key: "customer_last_name",
     },
     {
       title: "Rating",
@@ -149,19 +148,13 @@ const ManageReviewsPage: AppPageProps = () => {
               >
                 Approve
               </Button>
-              <Button
-                danger
-                onClick={() => showConfirm(record.id, "reject")}
-              >
+              <Button danger onClick={() => showConfirm(record.id, "reject")}>
                 Reject
               </Button>
             </>
           )}
           {record.status === REVIEW_STATUS.APPROVED && (
-            <Button
-              danger
-              onClick={() => showConfirm(record.id, "reject")}
-            >
+            <Button danger onClick={() => showConfirm(record.id, "reject")}>
               Reject
             </Button>
           )}

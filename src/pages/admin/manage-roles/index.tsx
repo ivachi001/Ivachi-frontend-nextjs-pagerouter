@@ -98,20 +98,15 @@ const ManageRolesPage: AppPageProps = () => {
       title: "Permissions",
       key: "permissions",
       render: (_, record) => (
-        <span>
-          {record.permissions?.map(p => p.name).join(", ")}
-        </span>
-      )
+        <span>{record.permissions?.map((p) => p.name).join(", ")}</span>
+      ),
     },
     {
       title: "Actions",
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button 
-            type="primary" 
-            onClick={() => handleEdit(record)}
-          >
+          <Button type="primary" onClick={() => handleEdit(record)}>
             Edit
           </Button>
         </Space>
@@ -124,7 +119,7 @@ const ManageRolesPage: AppPageProps = () => {
     setIsEditing(true);
     roleForm.setFieldsValue({
       name: role.name,
-      permission_ids: role.permissions?.map(p => p.id) || [],
+      permission_ids: role.permissions?.map((p) => p.id) || [],
     });
     setDrawerVisible(true);
   };
@@ -151,7 +146,9 @@ const ManageRolesPage: AppPageProps = () => {
       }
 
       if (response?.data) {
-        notify.success(`Role ${isEditing ? 'updated' : 'created'} successfully!`);
+        notify.success(
+          `Role ${isEditing ? "updated" : "created"} successfully!`
+        );
         setDrawerVisible(false);
         roleForm.resetFields();
         setSelectedRole(null);
@@ -159,7 +156,9 @@ const ManageRolesPage: AppPageProps = () => {
         fetchRoles(pagination.current, pagination.pageSize, searchText);
       }
     } catch (error: any) {
-      notify.error(error?.message || `Failed to ${isEditing ? 'update' : 'create'} role`);
+      notify.error(
+        error?.message || `Failed to ${isEditing ? "update" : "create"} role`
+      );
     } finally {
       setLoading(false);
     }

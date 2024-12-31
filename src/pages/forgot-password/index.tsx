@@ -19,7 +19,7 @@ const ForgotPasswordPage: React.FC = () => {
   const onFinish = async (values: ForgotPasswordFormData) => {
     try {
       setLoading(true);
-     notify.success(
+      notify.success(
         "Password reset instructions have been sent to your email"
       );
       form.resetFields();

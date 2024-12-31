@@ -59,7 +59,7 @@ const ManageCouponsPage: AppPageProps = () => {
         per_page: perPage,
         search,
       });
-console.log('response', response);
+      console.log("response", response);
 
       if (response?.list_data?.length > 0) {
         setCoupons(response?.list_data);
@@ -137,12 +137,12 @@ console.log('response', response);
           onChange={(checked) => handleStatusChange(record.id, checked)}
         />
       ),
-    }
+    },
   ];
 
   const handleCreateCoupon = async (values: any) => {
     console.log("handleCreateCoupon", values);
-    
+
     try {
       setLoading(true);
       const formattedValues = {
